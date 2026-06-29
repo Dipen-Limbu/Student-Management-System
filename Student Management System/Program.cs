@@ -1,3 +1,5 @@
+using Student_Management_System.Services;
+
 namespace Student_Management_System
 {
     public class Program
@@ -10,6 +12,8 @@ namespace Student_Management_System
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+            builder.Services.AddScoped<EmailService>();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
