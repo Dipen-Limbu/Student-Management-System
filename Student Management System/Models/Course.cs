@@ -15,3 +15,6 @@ public partial class Course
 
     public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 }
+
+
+// maadey vaile  first time commit gareko
