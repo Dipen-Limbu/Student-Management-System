@@ -33,6 +33,10 @@ namespace Student_Management_System
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Register ApplicationDbContext with SQL Server
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn")));
+
             var app = builder.Build();
 
             
@@ -60,7 +64,7 @@ namespace Student_Management_System
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Login}/{action=Login}/{id?}")
+                pattern: "{controller=login}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
