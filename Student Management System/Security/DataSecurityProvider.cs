@@ -2,5 +2,6 @@
 {
     public class DataSecurityProvider
     {
+        public string key = "key123456";
     }
 }

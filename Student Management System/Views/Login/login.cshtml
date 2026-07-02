@@ -1,0 +1,452 @@
+﻿
+@model UserEdit
+
+@{
+    Layout = null;
+    ViewData["Title"] = "Login-SMS";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In - Scholaris</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+            :root {
+                --primary: #2563eb;
+                --primary-hover: #1d4ed8;
+                --primary-light: rgba(37, 99, 235, 0.1);
+                --bg-left: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+                --text-dark: #1f2937;
+                --text-muted: #6b7280;
+                --border-color: #e5e7eb;
+                --border-focus: #2563eb;
+                --card-bg: rgba(255, 255, 255, 0.08);
+                --card-border: rgba(255, 255, 255, 0.12);
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            }
+
+            body, html {
+                height: 100%;
+                overflow: hidden;
+                background-color: #ffffff;
+            }
+
+            .login-container {
+                display: flex;
+                height: 100vh;
+                width: 100vw;
+            }
+            /* Left Section: Information Panel */
+            .info-panel {
+                flex: 1;
+                background: var(--bg-left);
+                color: #ffffff;
+                padding: 4rem;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                position: relative;
+                overflow: hidden;
+            }
+                /* Subtle background decorations */
+                .info-panel::before {
+                    content: '';
+                    position: absolute;
+                    top: -10%;
+                    left: -10%;
+                    width: 40%;
+                    height: 40%;
+                    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 80%);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+
+            .brand {
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-size: 1.5rem;
+                font-weight: 700;
+                letter-spacing: -0.025em;
+            }
+
+                .brand i {
+                    font-size: 1.6rem;
+                }
+
+            .main-content {
+                max-width: 520px;
+                margin-top: auto;
+                margin-bottom: auto;
+            }
+
+                .main-content h1 {
+                    font-size: 2.75rem;
+                    font-weight: 700;
+                    line-height: 1.25;
+                    margin-bottom: 1.25rem;
+                    letter-spacing: -0.02em;
+                }
+
+                .main-content p {
+                    font-size: 1.05rem;
+                    color: rgba(255, 255, 255, 0.85);
+                    line-height: 1.6;
+                    margin-bottom: 3rem;
+                    font-weight: 400;
+                }
+
+            .feature-cards {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1.25rem;
+            }
+
+            .feature-card {
+                background: var(--card-bg);
+                border: 1px solid var(--card-border);
+                border-radius: 12px;
+                padding: 1.5rem;
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+                transition: transform 0.2s, background-color 0.2s;
+            }
+
+                .feature-card:hover {
+                    transform: translateY(-2px);
+                    background: rgba(255, 255, 255, 0.12);
+                }
+
+                .feature-card i {
+                    font-size: 1.25rem;
+                    margin-bottom: 1rem;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    background: rgba(255, 255, 255, 0.15);
+                    border-radius: 8px;
+                }
+
+                .feature-card h3 {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    margin-bottom: 0.35rem;
+                }
+
+                .feature-card p {
+                    font-size: 0.875rem;
+                    color: rgba(255, 255, 255, 0.75);
+                    margin-bottom: 0;
+                    line-height: 1.4;
+                }
+
+            .copyright {
+                font-size: 0.875rem;
+                color: rgba(255, 255, 255, 0.6);
+                font-weight: 400;
+            }
+            /* Right Section: Form Panel */
+            .form-panel {
+                flex: 1;
+                background-color: #ffffff;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 4rem;
+                overflow-y: auto;
+            }
+
+            .form-wrapper {
+                width: 100%;
+                max-width: 440px;
+            }
+
+            .form-header {
+                margin-bottom: 2.5rem;
+            }
+
+                .form-header h2 {
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: var(--text-dark);
+                    margin-bottom: 0.5rem;
+                    letter-spacing: -0.025em;
+                }
+
+            .try-hint {
+                font-size: 0.875rem;
+                color: #4b5563;
+                line-height: 1.6;
+                margin-bottom: 2rem;
+            }
+
+                .try-hint code {
+                    background: #f3f4f6;
+                    padding: 0.15rem 0.35rem;
+                    border-radius: 4px;
+                    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+                    font-size: 0.85rem;
+                    color: #1f2937;
+                }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+                .form-group label {
+                    display: block;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    color: #374151;
+                    margin-bottom: 0.5rem;
+                }
+
+            .input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
+
+                .input-wrapper input {
+                    width: 100%;
+                    padding: 0.75rem 1rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: 8px;
+                    font-size: 0.95rem;
+                    outline: none;
+                    transition: border-color 0.25s, box-shadow 0.25s;
+                    color: var(--text-dark);
+                    background-color: #ffffff;
+                }
+
+                    .input-wrapper input:focus {
+                        border-color: var(--border-focus);
+                        box-shadow: 0 0 0 4px var(--primary-light);
+                    }
+
+            .password-toggle {
+                position: absolute;
+                right: 1rem;
+                cursor: pointer;
+                color: var(--text-muted);
+                font-size: 1rem;
+                padding: 0.25rem;
+                transition: color 0.2s;
+            }
+
+                .password-toggle:hover {
+                    color: var(--text-dark);
+                }
+
+            .form-options {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 0.875rem;
+                margin-top: 1rem;
+                margin-bottom: 1.75rem;
+            }
+
+            .remember-me {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                cursor: pointer;
+                color: #4b5563;
+                user-select: none;
+            }
+
+                .remember-me input {
+                    width: 1.05rem;
+                    height: 1.05rem;
+                    border-radius: 4px;
+                    border: 1px solid var(--border-color);
+                    accent-color: var(--primary);
+                    cursor: pointer;
+                }
+
+            .forgot-password {
+                color: var(--primary);
+                text-decoration: none;
+                font-weight: 600;
+                transition: color 0.2s;
+            }
+
+                .forgot-password:hover {
+                    color: var(--primary-hover);
+                }
+
+            .btn-submit {
+                width: 100%;
+                padding: 0.75rem 1rem;
+                background-color: var(--primary);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.2s, transform 0.1s;
+            }
+
+                .btn-submit:hover {
+                    background-color: var(--primary-hover);
+                }
+
+                .btn-submit:active {
+                    transform: scale(0.985);
+                }
+
+            .create-account {
+                text-align: center;
+                margin-top: 1.75rem;
+                font-size: 0.875rem;
+                color: var(--text-muted);
+            }
+
+                .create-account a {
+                    color: var(--primary);
+                    text-decoration: none;
+                    font-weight: 600;
+                    transition: color 0.2s;
+                }
+
+                    .create-account a:hover {
+                        color: var(--primary-hover);
+                    }
+
+            .error-message {
+                background-color: #fef2f2;
+                border: 1px solid #fca5a5;
+                color: #b91c1c;
+                padding: 0.75rem 1rem;
+                border-radius: 8px;
+                font-size: 0.875rem;
+                margin-bottom: 1.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            /* Responsive Design */
+            @@media (max-width: 992px) {
+                .info-panel {
+                    display: none;
+                }
+
+                .form-panel {
+                    flex: 1;
+                    padding: 2.5rem 1.5rem;
+                }
+            }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left Section: Branding -->
+        <div class="info-panel">
+            <div class="brand">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Scholaris</span>
+            </div>
+
+            <div class="main-content">
+                <h1>Manage your entire campus in one place.</h1>
+                <p>Track students, teachers, classes and attendance with a modern, delightful workflow built for schools of every size.</p>
+
+                <div class="feature-cards">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-users"></i>
+                        <h3>Unified roster</h3>
+                        <p>Everyone in one directory.</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <h3>Role based</h3>
+                        <p>Admin, Teacher, Student.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="copyright">
+                &copy; @DateTime.Now.Year Scholaris. Crafted for modern education.
+            </div>
+        </div>
+        <!-- Right Section: Login Form -->
+        <div class="form-panel">
+            <div class="form-wrapper">
+                <div class="form-header">
+                    <h2>Sign in to your account</h2>
+                    <div class="try-hint">
+                        Try <code>admin@example.com</code>, <code>teacher@example.com</code>, or <code>student@example.com</code>.
+                    </div>
+                </div>
+                @if (ViewBag.Error != null)
+                {
+                    <div class="error-message">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>@ViewBag.Error</span>
+                    </div>
+                }
+                <form asp-controller="Login" asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <div class="input-wrapper">
+                            <input type="email" id="email" name="email" value="admin@example.com" required placeholder="admin@example.com" autocomplete="email" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" required placeholder="••••••••" autocomplete="current-password" />
+                            <i class="fa-regular fa-eye-slash password-toggle" id="togglePassword"></i>
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="rememberMe" name="rememberMe" value="true" checked />
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="forgot-password">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn-submit">Sign In</button>
+                    <div class="create-account">
+                        Don't have an account? <a href="#">Create one</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Password visibility toggle script -->
+    <script>
+            const togglePassword = document.querySelector('#togglePassword');
+            const password = document.querySelector('#password');
+            togglePassword.addEventListener('click', function () {
+                // toggle the type attribute
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+
+                // toggle the icon
+                this.classList.toggle('fa-eye');
+                this.classList.toggle('fa-eye-slash');
+            });
+    </script>
+</body>
+</html>
