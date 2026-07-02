@@ -33,6 +33,10 @@ namespace Student_Management_System
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            // Register ApplicationDbContext with SQL Server
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn")));
+
             var app = builder.Build();
 
             
