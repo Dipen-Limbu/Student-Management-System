@@ -64,7 +64,7 @@ namespace Student_Management_System
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=login}/{action=Index}/{id?}")
+                pattern: "{controller=Login}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
