@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Student_Management_System.Models;
@@ -17,11 +17,15 @@ namespace Student_Management_System.Controllers
 
         // GET: /Login/Login
         [HttpGet]
-        public async Task<IActionResult> Login()
+        public IActionResult Login()
         {
-            // Always clear any existing authentication cookie
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Student")) return RedirectToAction("Dashboard", "Student");
+                if (User.IsInRole("Teacher")) return RedirectToAction("Dashboard", "Teacher");
+                if (User.IsInRole("Admin")) return RedirectToAction("Dashboard", "Admin");
+                return RedirectToAction("Dashboard", "Student"); // Fallback for now so the dashboard button always works
+            }
             return View();
         }
 
@@ -30,19 +34,35 @@ namespace Student_Management_System.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password, bool rememberMe)
         {
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
             {
                 ViewBag.Error = "Email and Password are required.";
                 return View();
             }
 
-            // Seed default users if database is empty
-            if (!_context.Users.Any())
+            // Seed default users if the database contains no users
+            try
             {
+                // Always run for development/testing so credentials work
                 SeedDefaultUsers();
             }
+            catch (Exception ex)
+            {
+                // In case database connection or table isn't created yet, log it but don't crash
+                Console.WriteLine($"Database access error: {ex.Message}");
+            }
 
-            var user = _context.Users.FirstOrDefault(u => u.Username == email);
+            // Look up user by username (matching the screenshot's try credentials)
+            User? user = null;
+            try
+            {
+                user = _context.Users.FirstOrDefault(u => u.Username == email);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = $"Database error: {ex.Message}";
+                return View();
+            }
 
             if (user == null)
             {
@@ -50,12 +70,14 @@ namespace Student_Management_System.Controllers
                 return View();
             }
 
-            if (!VerifyPassword(user, password))
+            bool isValid = VerifyPassword(user, password);
+            if (!isValid)
             {
                 ViewBag.Error = "Invalid email or password.";
                 return View();
             }
 
+            // Authentication Cookie Setup
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
@@ -63,71 +85,95 @@ namespace Student_Management_System.Controllers
                 new Claim("UserId", user.UserId.ToString())
             };
 
-            var identity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+            };
 
-            var principal = new ClaimsPrincipal(identity);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
 
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                principal,
-                new AuthenticationProperties
-                {
-                    IsPersistent = rememberMe,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
-                });
-
-            return RedirectToAction("Index", "Home");
+            if (user.Role == "Student")
+{
+    return RedirectToAction("Dashboard", "Student");
+}
+else if (user.Role == "Teacher")
+{
+    return RedirectToAction("Dashboard", "Teacher");
+}
+else if (user.Role == "Admin")
+{
+    return RedirectToAction("Dashboard", "Admin");
+}
+else
+{
+    return RedirectToAction("Index", "Home");
+}
         }
 
+        // GET: /Login/Logout
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction(nameof(Login));
+            return RedirectToAction("Login");
         }
 
         private bool VerifyPassword(User user, string inputPassword)
         {
+            // First check plain text (ideal for testing/development)
             if (user.PasswordHash == inputPassword)
+            {
                 return true;
+            }
 
+            // Then check SHA256 hashed password
             try
             {
-                using var sha = System.Security.Cryptography.SHA256.Create();
-                var bytes = System.Text.Encoding.UTF8.GetBytes(inputPassword);
-                var hash = Convert.ToHexString(sha.ComputeHash(bytes)).ToLower();
-
-                return user.PasswordHash.ToLower() == hash;
+                using (var sha = System.Security.Cryptography.SHA256.Create())
+                {
+                    var bytes = System.Text.Encoding.UTF8.GetBytes(inputPassword);
+                    var hashBytes = sha.ComputeHash(bytes);
+                    var hashString = Convert.ToHexString(hashBytes).ToLower();
+                    if (user.PasswordHash.ToLower() == hashString)
+                    {
+                        return true;
+                    }
+                }
             }
             catch
             {
-                return false;
+                // Fallback
             }
+
+            return false;
         }
 
         private void SeedDefaultUsers()
         {
-            _context.Users.AddRange(
-                new User
+            var users = new List<User>
+            {
+                new User { Username = "admin@example.com", PasswordHash = "admin123", Role = "Admin" },
+                new User { Username = "teacher@example.com", PasswordHash = "teacher123", Role = "Teacher" },
+                new User { Username = "student@example.com", PasswordHash = "student123", Role = "Student" }
+            };
+
+            foreach (var u in users)
+            {
+                var existingUser = _context.Users.FirstOrDefault(x => x.Username == u.Username);
+                if (existingUser == null)
                 {
-                    Username = "admin@example.com",
-                    PasswordHash = "admin123",
-                    Role = "Admin"
-                },
-                new User
+                    _context.Users.Add(u);
+                }
+                else
                 {
-                    Username = "teacher@example.com",
-                    PasswordHash = "teacher123",
-                    Role = "Teacher"
-                },
-                new User
-                {
-                    Username = "student@example.com",
-                    PasswordHash = "student123",
-                    Role = "Student"
-                });
+                    // Ensure the password and role match the defaults for testing
+                    existingUser.PasswordHash = u.PasswordHash;
+                    existingUser.Role = u.Role;
+                    _context.Users.Update(existingUser);
+                }
+            }
 
             _context.SaveChanges();
         }
