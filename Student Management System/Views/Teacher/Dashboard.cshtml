@@ -1,0 +1,162 @@
+@model Student_Management_System.Models.TeacherDashboardViewModel
+
+@{
+    ViewData["Title"] = "Teacher Dashboard";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-textDark mb-1">Teacher dashboard</h2>
+        <p class="text-textMuted text-sm">Your classes, students and today's tasks at a glance.</p>
+    </div>
+
+    <!-- Summary Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        
+        <!-- Assigned Classes -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm font-medium text-textMuted">Assigned Classes</span>
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-bold text-textDark">@Model.AssignedClasses</h3>
+            </div>
+        </div>
+
+        <!-- Students -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm font-medium text-textMuted">Students</span>
+                <div class="w-8 h-8 rounded-xl bg-cyan-50 text-cyan-500 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-bold text-textDark">@Model.TotalStudents</h3>
+            </div>
+        </div>
+
+        <!-- Today's Attendance -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm font-medium text-textMuted">Today's Attendance</span>
+                <div class="w-8 h-8 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-bold text-textDark">@Model.TodaysAttendance</h3>
+            </div>
+        </div>
+
+        <!-- Pending Tasks -->
+        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm font-medium text-textMuted">Pending Tasks</span>
+                <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-bold text-textDark">@Model.PendingTasks</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Main Content Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Left Column: My classes -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="px-6 py-5 border-b border-gray-100">
+                <h3 class="text-base font-bold text-textDark">My classes</h3>
+            </div>
+            <div class="p-6 flex-1">
+                <div class="space-y-6">
+                    @foreach(var classItem in Model.MyClasses)
+                    {
+                        <div class="flex justify-between items-center pb-6 border-b border-gray-100 last:border-0 last:pb-0">
+                            <div class="flex flex-col">
+                                <span class="text-base font-bold text-textDark mb-1">@classItem.ClassName</span>
+                                <span class="text-sm text-textMuted">@classItem.Room • @classItem.Semester</span>
+                            </div>
+                            <div class="flex flex-col text-right">
+                                <span class="text-sm font-bold text-textDark">@classItem.EnrolledStudents/@classItem.Capacity</span>
+                                <span class="text-xs text-textMuted">enrolled</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Weekly attendance chart -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+            <h3 class="text-base font-bold text-textDark mb-6">Weekly attendance</h3>
+            <div class="h-[300px] w-full relative flex-1">
+                <canvas id="weeklyAttendanceChart"></canvas>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Chart Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctxAttendance = document.getElementById('weeklyAttendanceChart').getContext('2d');
+        new Chart(ctxAttendance, {
+            type: 'bar',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                datasets: [
+                    {
+                        label: 'Present',
+                        data: [92, 88, 90, 85, 95],
+                        backgroundColor: '#3b82f6', // blue-500
+                        borderRadius: 4,
+                        barPercentage: 0.7,
+                        categoryPercentage: 0.6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'white',
+                        titleColor: '#0f172a',
+                        bodyColor: '#3b82f6',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return 'present : ' + context.parsed.y;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { color: '#64748b', font: { size: 12, family: 'Inter' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9', borderDash: [4, 4], drawBorder: false },
+                        ticks: { color: '#64748b', font: { size: 12, family: 'Inter' }, max: 100, stepSize: 25 }
+                    }
+                }
+            }
+        });
+    });
+</script>
