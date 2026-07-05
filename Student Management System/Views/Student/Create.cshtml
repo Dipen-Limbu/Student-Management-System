@@ -1,0 +1,129 @@
+@model Student_Management_System.Models.Student
+
+@{
+    ViewData["Title"] = "Add Student";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-textDark mb-1">Add Student</h2>
+            <p class="text-textMuted text-sm">Enter the details to create a new student record.</p>
+        </div>
+        <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to students
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-6 md:p-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Personal Details -->
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Personal Information</h3>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="FullName" class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <input asp-for="FullName" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. Liam Smith" />
+                    <span asp-validation-for="FullName" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Dob" class="block text-sm font-medium text-gray-700">Date of Birth</label>
+                    <input asp-for="Dob" type="date" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="Dob" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input asp-for="Email" type="email" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. liam.smith@school.edu" />
+                    <span asp-validation-for="Email" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input asp-for="Phone" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="+1 (555) 000-0000" />
+                    <span asp-validation-for="Phone" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="col-span-1 md:col-span-2 space-y-1.5">
+                    <label asp-for="Address" class="block text-sm font-medium text-gray-700">Address</label>
+                    <input asp-for="Address" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="123 Education St, City" />
+                    <span asp-validation-for="Address" class="text-xs text-red-500"></span>
+                </div>
+
+                <!-- Academic Details -->
+                <div class="col-span-1 md:col-span-2 mt-4">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Academic Information</h3>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="RollNo" class="block text-sm font-medium text-gray-700">Roll Number</label>
+                    <input asp-for="RollNo" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="2024-XXXX" />
+                    <span asp-validation-for="RollNo" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Course" class="block text-sm font-medium text-gray-700">Course</label>
+                    <select asp-for="Course" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors">
+                        <option value="">Select a course...</option>
+                        <option value="CS101">CS101</option>
+                        <option value="MA201">MA201</option>
+                        <option value="PH110">PH110</option>
+                        <option value="EN105">EN105</option>
+                        <option value="BUS220">BUS220</option>
+                        <option value="DS301">DS301</option>
+                    </select>
+                    <span asp-validation-for="Course" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                    <select asp-for="Semester" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors">
+                        <option value="">Select semester...</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                    <span asp-validation-for="Semester" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <select asp-for="Status" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <span asp-validation-for="Status" class="text-xs text-red-500"></span>
+                </div>
+
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#2563eb] border border-transparent rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
+                    Save Student
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

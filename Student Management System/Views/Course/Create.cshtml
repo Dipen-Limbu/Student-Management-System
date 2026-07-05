@@ -1,0 +1,94 @@
+@model Student_Management_System.Models.Course
+
+@{
+    ViewData["Title"] = "Add Course";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-textDark mb-1">Add Course</h2>
+            <p class="text-textMuted text-sm">Enter the details to create a new course.</p>
+        </div>
+        <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to courses
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-6 md:p-8">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Course Information</h3>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="CourseCode" class="block text-sm font-medium text-gray-700">Course Code</label>
+                    <input asp-for="CourseCode" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. CS101" />
+                    <span asp-validation-for="CourseCode" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="CourseName" class="block text-sm font-medium text-gray-700">Course Name</label>
+                    <input asp-for="CourseName" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. Introduction to Computer Science" />
+                    <span asp-validation-for="CourseName" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5 md:col-span-2">
+                    <label asp-for="Description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <textarea asp-for="Description" rows="3" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="Brief description of the course..."></textarea>
+                    <span asp-validation-for="Description" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="col-span-1 md:col-span-2 mt-2">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Course Details</h3>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Credits" class="block text-sm font-medium text-gray-700">Credits</label>
+                    <input asp-for="Credits" type="number" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. 3" />
+                    <span asp-validation-for="Credits" class="text-xs text-red-500"></span>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label asp-for="Duration" class="block text-sm font-medium text-gray-700">Duration (Weeks)</label>
+                    <input asp-for="Duration" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" placeholder="e.g. 16 weeks" />
+                    <span asp-validation-for="Duration" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="BannerColor" class="block text-sm font-medium text-gray-700">Banner Color Class (Optional)</label>
+                    <select asp-for="BannerColor" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors">
+                        <option value="">-- Random --</option>
+                        <option value="bg-[#2546a1]">Blue (bg-[#2546a1])</option>
+                        <option value="bg-[#0b80a6]">Cyan (bg-[#0b80a6])</option>
+                        <option value="bg-[#543bba]">Purple (bg-[#543bba])</option>
+                        <option value="bg-[#0f8a55]">Green (bg-[#0f8a55])</option>
+                        <option value="bg-[#ba7910]">Orange (bg-[#ba7910])</option>
+                        <option value="bg-[#ba2e2b]">Red (bg-[#ba2e2b])</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#2563eb] border border-transparent rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
+                    Save Course
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,75 @@
+@model IEnumerable<Student_Management_System.Models.Course>
+
+@{
+    ViewData["Title"] = "Courses";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-2xl font-bold text-textDark mb-1">Courses</h2>
+            <p class="text-textMuted text-sm">All active courses this semester</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-white bg-[#2563eb] rounded-xl hover:bg-blue-700 shadow-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add course
+            </a>
+        </div>
+    </div>
+
+    <!-- Grid Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        @foreach (var course in Model)
+        {
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-hidden group hover:shadow-md transition-shadow relative">
+                
+                <!-- Colored Banner with Course Code -->
+                <div class="@course.BannerColor h-[104px] p-5 flex items-start justify-between relative">
+                    <span class="inline-flex bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-md backdrop-blur-sm tracking-wide">
+                        @course.CourseCode
+                    </span>
+                    
+                    <!-- Action Buttons (Visible on Hover) -->
+                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 backdrop-blur-sm rounded-lg p-1">
+                        <a asp-action="Details" asp-route-id="@course.CourseId" class="p-1.5 text-white/90 hover:text-white hover:bg-white/20 rounded transition-all" title="View Details">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@course.CourseId" class="p-1.5 text-white/90 hover:text-white hover:bg-white/20 rounded transition-all" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@course.CourseId" class="p-1.5 text-white/90 hover:text-red-100 hover:bg-red-500/40 rounded transition-all" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Course Info -->
+                <div class="p-6">
+                    <h3 class="font-bold text-[17px] text-gray-900 mb-2 truncate" title="@course.CourseName">@course.CourseName</h3>
+                    <p class="text-[14px] text-gray-500 line-clamp-2 min-h-[40px] mb-6 leading-relaxed">
+                        @course.Description
+                    </p>
+
+                    <!-- Footer Stats -->
+                    <div class="flex items-center gap-5 text-sm text-gray-500 font-medium">
+                        <div class="flex items-center gap-1.5" title="Credits">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                            <span>@course.Credits credits</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Duration">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <span>@course.Duration</span>
+                        </div>
+                        <div class="flex items-center gap-1.5" title="Enrolled Students">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                            <span>@course.EnrolledStudents</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

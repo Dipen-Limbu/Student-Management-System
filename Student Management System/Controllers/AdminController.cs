@@ -41,7 +41,32 @@ namespace Student_Management_System.Controllers
         public IActionResult Attendance() { return View(); }
         public IActionResult Reports() { return View(); }
         public IActionResult Users() { return View(); }
-        public IActionResult Profile() { return View(); }
+        public IActionResult Profile() 
+        { 
+            var model = new AdminProfileViewModel
+            {
+                FirstName = "Ada",
+                LastName = "Admin",
+                Email = "admin@example.com",
+                Phone = "+1 555 010 1000",
+                Role = "Admin"
+            };
+            return View(model); 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Profile(AdminProfileViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // In a real application, you would save these changes to the database here.
+                // For now, just redirect back to the profile page to simulate a successful save.
+                TempData["SuccessMessage"] = "Profile updated successfully.";
+                return RedirectToAction(nameof(Profile));
+            }
+            return View(model);
+        }
         public IActionResult Settings() { return View(); }
     }
 }

@@ -1,0 +1,81 @@
+@model Student_Management_System.Models.ClassViewModel
+
+@{
+    ViewData["Title"] = "Class Details";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-textDark mb-1">Class Details</h2>
+            <p class="text-textMuted text-sm">View comprehensive information for @Model.ClassName.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Back to classes
+            </a>
+            <a asp-action="Edit" asp-route-id="@Model?.ClassId" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-[#2563eb] rounded-xl hover:bg-blue-700 shadow-sm transition-colors">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Edit Class
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] overflow-hidden">
+        
+        <!-- Header -->
+        <div class="p-6 md:p-8 border-b border-gray-100 bg-gray-50/50">
+            <h3 class="text-3xl font-bold text-gray-900 mb-2">@Model.ClassName</h3>
+            <p class="text-gray-600">Course Code: <span class="font-semibold">@Model.CourseCode</span></p>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                
+                <div class="md:col-span-2">
+                    <h4 class="text-xs font-semibold text-textMuted uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Scheduling Information</h4>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Semester</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">@(Model.Semester ?? "N/A")</dd>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Section</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">@(Model.Section ?? "N/A")</dd>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Teacher</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">@(Model.TeacherName ?? "N/A")</dd>
+                </div>
+                
+                <div>
+                    <dt class="text-sm font-medium text-gray-500">Room / Location</dt>
+                    <dd class="mt-1 text-sm text-gray-900 font-medium">@(Model.Room ?? "N/A")</dd>
+                </div>
+
+                <div class="md:col-span-2 mt-4">
+                    <h4 class="text-xs font-semibold text-textMuted uppercase tracking-wider mb-4 border-b border-gray-100 pb-2">Enrollment Status</h4>
+                </div>
+                
+                <div class="md:col-span-2">
+                    <dt class="text-sm font-medium text-gray-500 mb-3">Capacity Progress</dt>
+                    <dd class="text-sm text-gray-900 font-medium">
+                        <div class="flex items-center gap-4 max-w-md">
+                            <div class="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-600 rounded-full" style="width: @Model.EnrollmentPercentage%"></div>
+                            </div>
+                            <span class="text-gray-600 font-semibold shrink-0">@Model.EnrolledStudents / @Model.Capacity</span>
+                        </div>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+        
+    </div>
+</div>

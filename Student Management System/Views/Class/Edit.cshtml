@@ -1,0 +1,95 @@
+@model Student_Management_System.Models.ClassViewModel
+
+@{
+    ViewData["Title"] = "Edit Class";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6 flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-textDark mb-1">Edit Class</h2>
+            <p class="text-textMuted text-sm">Update the details for @Model.ClassName.</p>
+        </div>
+        <a asp-action="Index" class="inline-flex items-center text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to classes
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-6 md:p-8">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
+            <input type="hidden" asp-for="ClassId" />
+            <input type="hidden" asp-for="EnrolledStudents" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Class Identification</h3>
+                </div>
+
+                <div class="space-y-1.5 md:col-span-2">
+                    <label asp-for="ClassName" class="block text-sm font-medium text-gray-700">Class Name</label>
+                    <input asp-for="ClassName" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="ClassName" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="CourseCode" class="block text-sm font-medium text-gray-700">Course Code</label>
+                    <input asp-for="CourseCode" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="CourseCode" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Section" class="block text-sm font-medium text-gray-700">Section</label>
+                    <input asp-for="Section" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="Section" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="col-span-1 md:col-span-2 mt-2">
+                    <h3 class="text-base font-semibold text-textDark border-b border-gray-100 pb-3 mb-4">Scheduling Details</h3>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Semester" class="block text-sm font-medium text-gray-700">Semester</label>
+                    <input asp-for="Semester" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="Semester" class="text-xs text-red-500"></span>
+                </div>
+                
+                <div class="space-y-1.5">
+                    <label asp-for="TeacherName" class="block text-sm font-medium text-gray-700">Teacher</label>
+                    <input asp-for="TeacherName" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="TeacherName" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Room" class="block text-sm font-medium text-gray-700">Room/Location</label>
+                    <input asp-for="Room" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="Room" class="text-xs text-red-500"></span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label asp-for="Capacity" class="block text-sm font-medium text-gray-700">Max Capacity</label>
+                    <input asp-for="Capacity" type="number" class="block w-full px-3 py-2 border border-gray-200 rounded-xl leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors" />
+                    <span asp-validation-for="Capacity" class="text-xs text-red-500"></span>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-5 border-t border-gray-100 flex items-center justify-end gap-3">
+                <a asp-action="Index" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Cancel
+                </a>
+                <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-[#2563eb] border border-transparent rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
