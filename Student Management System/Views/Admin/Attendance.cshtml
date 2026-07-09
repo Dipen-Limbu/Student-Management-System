@@ -1,0 +1,215 @@
+@{
+    ViewData["Title"] = "Attendance";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-6xl mx-auto">
+
+    <!-- Page Header -->
+    <div class="flex items-start justify-between mb-6">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Attendance</h2>
+            <p class="text-sm text-blue-500 font-medium">Mark attendance for your classes</p>
+        </div>
+        <button id="saveChangesBtn"
+                onclick="saveAttendance()"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Save changes
+        </button>
+    </div>
+
+    <!-- Filters Row -->
+    <div class="flex items-center gap-3 mb-5">
+        <!-- Class Selector -->
+        <div class="relative">
+            <select id="classFilter"
+                    onchange="filterAttendance()"
+                    class="appearance-none pl-3 pr-8 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 cursor-pointer transition-all">
+                <option value="CS101A">CS101  A</option>
+                <option value="CS101B">CS101  B</option>
+                <option value="MA201A">MA201  A</option>
+                <option value="MA201B">MA201  B</option>
+                <option value="PH110A">PH110  A</option>
+                <option value="DS301A">DS301  A</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 text-gray-500">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Date Picker -->
+        <input type="date"
+               id="dateFilter"
+               value="2026-05-07"
+               onchange="filterAttendance()"
+               class="px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer" />
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+
+        <!-- Table Header -->
+        <div class="grid gap-4 px-5 py-3 border-b border-gray-100 bg-gray-50/60"
+             style="grid-template-columns: 1fr 180px auto;">
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Student</span>
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</span>
+            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</span>
+        </div>
+
+        <!-- Table Body -->
+        <div id="attendanceTableBody"></div>
+    </div>
+
+    <!-- Save Toast Notification -->
+    <div id="saveToast"
+         class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 px-5 py-3.5 bg-gray-900 text-white text-sm font-medium rounded-xl shadow-xl">
+        <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Attendance saved successfully!</span>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ─── Data ────────────────────────────────────────────────────────────────────
+    const allRecords = [
+        // Liam Smith
+        { id: 1,  student: "Liam Smith",  date: "2026-07-05", status: "Present", isLink: false },
+        { id: 2,  student: "Liam Smith",  date: "2026-07-04", status: "Present", isLink: false },
+        { id: 3,  student: "Liam Smith",  date: "2026-07-03", status: "Present", isLink: false },
+        { id: 4,  student: "Liam Smith",  date: "2026-07-02", status: "Present", isLink: false },
+        { id: 5,  student: "Liam Smith",  date: "2026-07-01", status: "Absent",  isLink: false },
+        { id: 6,  student: "Liam Smith",  date: "2026-06-30", status: "Leave",   isLink: false },
+        { id: 7,  student: "Liam Smith",  date: "2026-06-29", status: "Late",    isLink: false },
+        // Ava Taylor
+        { id: 8,  student: "Ava Taylor",  date: "2026-07-05", status: "Leave",   isLink: true },
+        { id: 9,  student: "Ava Taylor",  date: "2026-07-04", status: "Late",    isLink: true },
+        { id: 10, student: "Ava Taylor",  date: "2026-07-03", status: "Present", isLink: true },
+        { id: 11, student: "Ava Taylor",  date: "2026-07-02", status: "Present", isLink: true },
+        { id: 12, student: "Ava Taylor",  date: "2026-07-01", status: "Present", isLink: true },
+        { id: 13, student: "Ava Taylor",  date: "2026-06-30", status: "Present", isLink: true },
+        { id: 14, student: "Ava Taylor",  date: "2026-06-29", status: "Present", isLink: true },
+        // James Smith
+        { id: 15, student: "James Smith", date: "2026-07-05", status: "Present", isLink: true },
+        { id: 16, student: "James Smith", date: "2026-07-04", status: "Present", isLink: true },
+        { id: 17, student: "James Smith", date: "2026-07-03", status: "Absent",  isLink: true },
+        { id: 18, student: "James Smith", date: "2026-07-02", status: "Leave",   isLink: true },
+        { id: 19, student: "James Smith", date: "2026-07-01", status: "Late",    isLink: true },
+        { id: 20, student: "James Smith", date: "2026-06-30", status: "Present", isLink: true },
+        { id: 21, student: "James Smith", date: "2026-06-29", status: "Present", isLink: true },
+        // Mia Taylor
+        { id: 22, student: "Mia Taylor",  date: "2026-07-05", status: "Present", isLink: true },
+        { id: 23, student: "Mia Taylor",  date: "2026-07-04", status: "Present", isLink: true },
+        { id: 24, student: "Mia Taylor",  date: "2026-07-03", status: "Present", isLink: true },
+        { id: 25, student: "Mia Taylor",  date: "2026-07-02", status: "Present", isLink: true },
+        { id: 26, student: "Mia Taylor",  date: "2026-07-01", status: "Present", isLink: true },
+        { id: 27, student: "Mia Taylor",  date: "2026-06-30", status: "Absent",  isLink: true },
+        { id: 28, student: "Mia Taylor",  date: "2026-06-29", status: "Leave",   isLink: true },
+    ];
+
+    // Live status state (keyed by record id)
+    const statusState = {};
+    allRecords.forEach(r => statusState[r.id] = r.status);
+
+    // ─── Status config ───────────────────────────────────────────────────────────
+    const statuses = ["Present", "Absent", "Leave", "Late"];
+
+    const activeClasses = {
+        Present: "bg-green-500 text-white border-transparent",
+        Absent:  "bg-red-500  text-white border-transparent",
+        Leave:   "bg-blue-500 text-white border-transparent",
+        Late:    "bg-orange-400 text-white border-transparent",
+    };
+
+    const inactiveClass = "bg-white text-gray-400 border-gray-200 hover:border-gray-300 hover:bg-gray-50";
+
+    // ─── Render ──────────────────────────────────────────────────────────────────
+    function renderTable() {
+        const tbody = document.getElementById("attendanceTableBody");
+        tbody.innerHTML = "";
+
+        allRecords.forEach((rec, idx) => {
+            const isLast = idx === allRecords.length - 1;
+
+            const row = document.createElement("div");
+            row.className = "grid gap-4 items-center px-5 py-3.5 hover:bg-gray-50/50 transition-colors" + (isLast ? "" : " border-b border-gray-100");
+            row.style.gridTemplateColumns = "1fr 180px auto";
+
+            // Student name cell
+            const nameCell = document.createElement("div");
+            if (rec.isLink) {
+                nameCell.innerHTML = `<a href="#" class="text-blue-500 hover:text-blue-700 text-sm font-medium transition-colors">${rec.student}</a>`;
+            } else {
+                nameCell.innerHTML = `<span class="text-sm font-medium text-gray-800">${rec.student}</span>`;
+            }
+
+            // Date cell
+            const dateCell = document.createElement("div");
+            dateCell.className = "text-sm text-gray-400";
+            dateCell.textContent = rec.date;
+
+            // Status buttons cell
+            const statusCell = document.createElement("div");
+            statusCell.className = "flex items-center gap-1.5";
+
+            statuses.forEach(s => {
+                const btn = document.createElement("button");
+                const isActive = statusState[rec.id] === s;
+                btn.textContent = s;
+                btn.className = `px-3 py-1 rounded-full text-xs font-semibold border transition-all focus:outline-none ${isActive ? activeClasses[s] : inactiveClass}`;
+                btn.setAttribute("data-rid", rec.id);
+                btn.setAttribute("data-status", s);
+                btn.onclick = () => setStatus(rec.id, s);
+                statusCell.appendChild(btn);
+            });
+
+            row.appendChild(nameCell);
+            row.appendChild(dateCell);
+            row.appendChild(statusCell);
+            tbody.appendChild(row);
+        });
+    }
+
+    // ─── Toggle status ───────────────────────────────────────────────────────────
+    function setStatus(recordId, newStatus) {
+        statusState[recordId] = newStatus;
+        document.querySelectorAll(`[data-rid="${recordId}"]`).forEach(btn => {
+            const s = btn.getAttribute("data-status");
+            btn.className = `px-3 py-1 rounded-full text-xs font-semibold border transition-all focus:outline-none ${s === newStatus ? activeClasses[s] : inactiveClass}`;
+        });
+    }
+
+    // ─── Filter ──────────────────────────────────────────────────────────────────
+    function filterAttendance() {
+        renderTable();
+    }
+
+    // ─── Save ────────────────────────────────────────────────────────────────────
+    function saveAttendance() {
+        const btn = document.getElementById("saveChangesBtn");
+        btn.disabled = true;
+        btn.textContent = "Saving\u2026";
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.textContent = "Save changes";
+            showToast();
+        }, 800);
+    }
+
+    function showToast() {
+        const toast = document.getElementById("saveToast");
+        toast.classList.remove("hidden");
+        toast.classList.add("flex");
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("flex");
+        }, 3000);
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────────
+    renderTable();
+</script>
+}

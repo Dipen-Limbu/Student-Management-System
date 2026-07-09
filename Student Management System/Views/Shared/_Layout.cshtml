@@ -45,7 +45,7 @@
         .nav-brand-icon {
             width: 32px; height: 32px;
             background: #2563eb;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -134,9 +134,11 @@
     <nav class="scholaris-nav">
         <a class="nav-brand" asp-controller="Home" asp-action="Index">
             <div class="nav-brand-icon">
-                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M12 14l9-5-9-5-9 5 9 5zm0 0v6" />
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M6 10V6a2 2 0 012-2h8a2 2 0 012 2v4" />
+                    <path d="M4 10v8a2 2 0 002 2h12a2 2 0 002-2v-8" />
+                    <path d="M4 10h16" />
+                    <path d="M10 15h4" />
                 </svg>
             </div>
             <span class="nav-brand-name">Scholaris</span>

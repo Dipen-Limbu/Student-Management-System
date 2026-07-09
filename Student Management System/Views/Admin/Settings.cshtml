@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">Settings</h2>
+        <p class="text-sm text-gray-500">Manage your workspace preferences</p>
+    </div>
+
+    <!-- Row 1: Language Card -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+            <h3 class="text-base font-bold text-gray-900 mb-1">Language</h3>
+            <p class="text-sm text-gray-500 mb-4">Choose your preferred language.</p>
+            <div class="relative">
+                <select id="languageSelect" class="block w-full px-4 py-2.5 border border-gray-200 bg-gray-50/50 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-gray-700 transition-all appearance-none cursor-pointer">
+                    <option value="en-US">English (US)</option>
+                    <option value="en-GB">English (UK)</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="de">Deutsch</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 2: Notifications Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden">
+        <div class="p-6 border-b border-gray-100 bg-gray-50/20">
+            <h3 class="text-base font-bold text-gray-900 mb-1">Notifications</h3>
+            <p class="text-sm text-gray-500">Decide how you want to be notified.</p>
+        </div>
+        <div class="divide-y divide-gray-100 px-6">
+            <!-- Email notifications -->
+            <div class="py-5 flex items-center justify-between">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800">Email notifications</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">Announcements, alerts and reminders.</p>
+                </div>
+                <button onclick="toggleSwitch('emailNotif')" id="emailNotif" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600" aria-checked="true">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+
+            <!-- Push notifications -->
+            <div class="py-5 flex items-center justify-between">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800">Push notifications</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">Real-time updates in the app.</p>
+                </div>
+                <button onclick="toggleSwitch('pushNotif')" id="pushNotif" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600" aria-checked="true">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+
+            <!-- SMS notifications -->
+            <div class="py-5 flex items-center justify-between">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800">SMS notifications</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">Critical alerts by text.</p>
+                </div>
+                <button onclick="toggleSwitch('smsNotif')" id="smsNotif" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-gray-200" aria-checked="false">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-0 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+
+            <!-- Weekly digest -->
+            <div class="py-5 flex items-center justify-between">
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-800">Weekly digest</h4>
+                    <p class="text-xs text-gray-500 mt-0.5">A summary email every Monday.</p>
+                </div>
+                <button onclick="toggleSwitch('weeklyDigest')" id="weeklyDigest" class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-blue-600" aria-checked="true">
+                    <span class="pointer-events-none inline-block h-5 w-5 translate-x-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Button Container -->
+    <div class="flex justify-end pt-2">
+        <button onclick="saveSettings()" id="saveBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-sm font-semibold rounded-xl shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Save settings
+        </button>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="saveToast" class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 px-5 py-3.5 bg-gray-900 text-white text-sm font-medium rounded-xl shadow-xl transition-all">
+        <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Settings saved successfully!</span>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Toggle switch logic helper
+    function toggleSwitch(id) {
+        const btn = document.getElementById(id);
+        const dot = btn.querySelector('span');
+        const isChecked = btn.getAttribute('aria-checked') === 'true';
+
+        if (isChecked) {
+            btn.setAttribute('aria-checked', 'false');
+            btn.classList.remove('bg-blue-600');
+            btn.classList.add('bg-gray-200');
+            dot.classList.remove('translate-x-5');
+            dot.classList.add('translate-x-0');
+        } else {
+            btn.setAttribute('aria-checked', 'true');
+            btn.classList.remove('bg-gray-200');
+            btn.classList.add('bg-blue-600');
+            dot.classList.remove('translate-x-0');
+            dot.classList.add('translate-x-5');
+        }
+    }
+
+    // Save configuration handler
+    function saveSettings() {
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
+
+        setTimeout(() => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save settings';
+            showToast();
+        }, 800);
+    }
+
+    function showToast() {
+        const toast = document.getElementById('saveToast');
+        toast.classList.remove('hidden');
+        toast.classList.add('flex');
+        setTimeout(() => {
+            toast.classList.add('hidden');
+            toast.classList.remove('flex');
+        }, 3000);
+    }
+</script>
+}
