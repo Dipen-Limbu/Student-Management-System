@@ -1,0 +1,46 @@
+@model Student_Management_System.Models.Course
+
+@{
+    ViewData["Title"] = "Delete Course";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-2xl mx-auto mt-10">
+    <div class="bg-white rounded-2xl border border-red-100 shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-6 md:p-8 relative overflow-hidden">
+        <!-- Top accent line -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+        
+        <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <h2 class="text-xl font-bold text-textDark mb-2">Delete Course Record</h2>
+                <p class="text-sm text-textMuted mb-6">Are you sure you want to delete the course <strong class="text-gray-800">@Model.CourseName</strong> (@Model.CourseCode)? This action cannot be undone.</p>
+                
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-6">
+                    <div class="grid grid-cols-2 gap-y-3 text-sm">
+                        <div class="text-gray-500">Course Code:</div>
+                        <div class="font-medium text-gray-900">@Model.CourseCode</div>
+                        
+                        <div class="text-gray-500">Course Name:</div>
+                        <div class="font-medium text-gray-900">@Model.CourseName</div>
+                        
+                        <div class="text-gray-500">Credits:</div>
+                        <div class="font-medium text-gray-900">@Model.Credits</div>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" class="flex items-center gap-3">
+                    <input type="hidden" asp-for="CourseId" />
+                    <button type="submit" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 border border-transparent rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 shadow-sm transition-colors">
+                        Yes, delete course
+                    </button>
+                    <a asp-action="Index" class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
