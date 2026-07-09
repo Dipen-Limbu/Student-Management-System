@@ -1,0 +1,357 @@
+@{
+    ViewData["Title"] = "Reports";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 mb-1">Reports</h2>
+            <p class="text-sm text-gray-500">Statistics and insights across your campus</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="downloadReport('PDF')" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors shadow-sm gap-2">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                PDF
+            </button>
+            <button onclick="downloadReport('CSV')" class="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors shadow-sm gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Students -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[135px]">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-500">Total Students</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">42</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">+12%</span>
+            </div>
+        </div>
+
+        <!-- Total Teachers -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[135px]">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-500">Total Teachers</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">5</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">+4%</span>
+            </div>
+        </div>
+
+        <!-- Active Courses -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[135px]">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-500">Active Courses</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">6</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-2">
+                <!-- course has no positive growth pill in the layout, so leave it empty or matches perfectly -->
+            </div>
+        </div>
+
+        <!-- Avg Attendance -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between h-[135px]">
+            <div class="flex items-start justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-gray-500">Avg Attendance</p>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">91%</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-2">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">+2%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Enrollment Over Time (Line Chart) -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] lg:col-span-2 flex flex-col justify-between min-h-[380px]">
+            <div>
+                <h4 class="text-base font-bold text-gray-900 mb-4">Enrollment over time</h4>
+            </div>
+            <div class="relative flex-1 h-[280px]">
+                <canvas id="enrollmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Students by Course (Doughnut Chart) -->
+        <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col justify-between min-h-[380px]">
+            <div>
+                <h4 class="text-base font-bold text-gray-900 mb-2">Students by course</h4>
+            </div>
+            <div class="relative flex-1 flex items-center justify-center h-[200px] mb-4">
+                <canvas id="courseChart" class="max-h-[180px] max-w-[180px]"></canvas>
+            </div>
+            <!-- Custom Legends to perfectly match image placement -->
+            <div class="grid grid-cols-3 gap-y-2 gap-x-2 text-[10px] text-gray-500 font-medium justify-items-center mt-2">
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(0)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#2563eb]"></span>
+                    <span>CS101</span>
+                </div>
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(1)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#0ea5e9]"></span>
+                    <span>MA201</span>
+                </div>
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(2)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#6366f1]"></span>
+                    <span>PH110</span>
+                </div>
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(3)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#10b981]"></span>
+                    <span>EN105</span>
+                </div>
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(4)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#f59e0b]"></span>
+                    <span>BUS220</span>
+                </div>
+                <div class="flex items-center gap-1.5 cursor-pointer" onclick="toggleCourseLegend(5)">
+                    <span class="w-2.5 h-2.5 rounded-full bg-[#f43f5e]"></span>
+                    <span>DS301</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="bg-white p-6 rounded-2xl border border-gray-200 shadow-[0_1px_3px_rgba(0,0,0,0.04)] min-h-[380px] flex flex-col justify-between">
+        <div>
+            <h4 class="text-base font-bold text-gray-900 mb-4">Attendance this week</h4>
+        </div>
+        <div class="relative flex-1 h-[280px]">
+            <canvas id="attendanceChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Export Action Toast Notifications -->
+    <div id="toastNotification"
+         class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 px-5 py-3.5 bg-gray-900 text-white text-sm font-medium rounded-xl shadow-xl transition-all">
+        <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toastMessage">Report generated successfully!</span>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Global chart instances
+    let enrollmentChart, courseChart, attendanceChart;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- 1. Enrollment Over Time Line Chart ---
+        const enrollmentCtx = document.getElementById("enrollmentChart").getContext("2d");
+        enrollmentChart = new Chart(enrollmentCtx, {
+            type: "line",
+            data: {
+                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"],
+                datasets: [{
+                    label: "Students",
+                    data: [210, 240, 260, 275, 310, 340, 365, 410],
+                    borderColor: "#3b82f6",
+                    borderWidth: 2,
+                    pointBackgroundColor: "#ffffff",
+                    pointBorderColor: "#3b82f6",
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    tension: 0.3,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: "#9ca3af", font: { size: 10 } }
+                    },
+                    y: {
+                        min: 0,
+                        max: 400,
+                        ticks: {
+                            stepSize: 100,
+                            color: "#9ca3af",
+                            font: { size: 10 }
+                        },
+                        grid: {
+                            borderDash: [4, 4],
+                            color: "#e5e7eb"
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- 2. Students by Course Doughnut Chart ---
+        const courseCtx = document.getElementById("courseChart").getContext("2d");
+        courseChart = new Chart(courseCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["CS101", "MA201", "PH110", "EN105", "BUS220", "DS301"],
+                datasets: [{
+                    data: [12, 8, 7, 6, 5, 4],
+                    backgroundColor: [
+                        "#2563eb", // CS101 (Blue)
+                        "#0ea5e9", // MA201 (Light Blue)
+                        "#6366f1", // PH110 (Indigo/Purple)
+                        "#10b981", // EN105 (Green)
+                        "#f59e0b", // BUS220 (Amber)
+                        "#f43f5e"  // DS301 (Rose/Red)
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "68%",
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        // --- 3. Attendance this Week Multi-Line Chart ---
+        const attendanceCtx = document.getElementById("attendanceChart").getContext("2d");
+        attendanceChart = new Chart(attendanceCtx, {
+            type: "line",
+            data: {
+                labels: ["Mon", "Tue", "Wed", "Thu", "Fri"],
+                datasets: [
+                    {
+                        label: "present",
+                        data: [92, 89, 91, 86, 94],
+                        borderColor: "#3b82f6",
+                        borderWidth: 2,
+                        pointBackgroundColor: "#ffffff",
+                        pointBorderColor: "#3b82f6",
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.1,
+                        fill: false
+                    },
+                    {
+                        label: "absent",
+                        data: [8, 11, 9, 14, 6],
+                        borderColor: "#f43f5e",
+                        borderWidth: 2,
+                        pointBackgroundColor: "#ffffff",
+                        pointBorderColor: "#f43f5e",
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        tension: 0.1,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: "circle",
+                            boxWidth: 6,
+                            boxHeight: 6,
+                            color: "#6b7280",
+                            font: { size: 11, weight: "medium" },
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: "#9ca3af", font: { size: 10 } }
+                    },
+                    y: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 25,
+                            color: "#9ca3af",
+                            font: { size: 10 }
+                        },
+                        grid: {
+                            borderDash: [4, 4],
+                            color: "#e5e7eb"
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    // --- Interactive Legend Toggle for Course Doughnut Chart ---
+    function toggleCourseLegend(index) {
+        if (!courseChart) return;
+        const meta = courseChart.getDatasetMeta(0);
+        meta.data[index].hidden = !meta.data[index].hidden;
+        courseChart.update();
+    }
+
+    // --- Export Handler ---
+    function downloadReport(format) {
+        const toast = document.getElementById("toastNotification");
+        const msg = document.getElementById("toastMessage");
+        
+        msg.textContent = `${format} report downloading...`;
+        toast.classList.remove("hidden");
+        toast.classList.add("flex");
+
+        // Click effect triggers a dummy CSV or PDF download
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("flex");
+        }, 3000);
+    }
+</script>
+}

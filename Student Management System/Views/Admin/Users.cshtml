@@ -1,0 +1,314 @@
+@{
+    ViewData["Title"] = "Users";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="max-w-6xl mx-auto">
+
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-900 mb-1">Users</h2>
+        <p class="text-sm text-gray-500">26 accounts across roles</p>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
+
+        <!-- Table Header -->
+        <div class="grid gap-4 px-6 py-3 border-b border-gray-100 bg-gray-50/60"
+             style="grid-template-columns: 1.6fr 2fr 140px 120px;">
+            <span class="text-xs font-semibold text-blue-500 uppercase tracking-wider">User</span>
+            <span class="text-xs font-semibold text-blue-500 uppercase tracking-wider">Email</span>
+            <span class="text-xs font-semibold text-blue-500 uppercase tracking-wider">Role</span>
+            <span class="text-xs font-semibold text-blue-500 uppercase tracking-wider">Status</span>
+        </div>
+
+        <!-- Table Body -->
+        <div id="usersTableBody"></div>
+    </div>
+
+    <!-- ── Modals ─────────────────────────────────────────────────────────────── -->
+
+    <!-- Edit User Modal -->
+    <div id="editModal"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <h3 class="text-base font-bold text-gray-900">Edit User</h3>
+                <button onclick="closeModal('editModal')"
+                        class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="px-6 py-5 space-y-4">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-semibold text-gray-700">Name</label>
+                    <input id="editName" type="text"
+                           class="block w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all" />
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-semibold text-gray-700">Email</label>
+                    <input id="editEmail" type="email"
+                           class="block w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all" />
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Role</label>
+                        <select id="editRole"
+                                class="block w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all">
+                            <option value="Teacher">Teacher</option>
+                            <option value="Student">Student</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Status</label>
+                        <select id="editStatus"
+                                class="block w-full px-3 py-2.5 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 text-sm transition-all">
+                            <option value="active">active</option>
+                            <option value="inactive">inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/40">
+                <button onclick="closeModal('editModal')"
+                        class="px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="saveEdit()"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors">
+                    Save changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal"
+         class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+            <div class="px-6 py-5 text-center">
+                <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </div>
+                <h3 class="text-base font-bold text-gray-900 mb-1">Delete User</h3>
+                <p class="text-sm text-gray-500">Are you sure you want to delete <span id="deleteUserName" class="font-semibold text-gray-700"></span>? This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-3 px-6 pb-5">
+                <button onclick="closeModal('deleteModal')"
+                        class="flex-1 px-4 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="confirmDelete()"
+                        class="flex-1 px-4 py-2 text-sm font-semibold text-white bg-red-500 rounded-xl hover:bg-red-600 transition-colors">
+                    Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"
+         class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 px-5 py-3.5 bg-gray-900 text-white text-sm font-medium rounded-xl shadow-xl">
+        <svg class="w-5 h-5 text-green-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span id="toastMessage">Done!</span>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // ── Data ─────────────────────────────────────────────────────────────────────
+    let users = [
+        { id: 1,  name: "Emily Carter",       email: "emily.carter@school.edu",          role: "Teacher",  status: "active",   emailLink: false },
+        { id: 2,  name: "Michael Nguyen",      email: "michael.nguyen@school.edu",        role: "Teacher",  status: "active",   emailLink: false },
+        { id: 3,  name: "Priya Sharma",        email: "priya.sharma@school.edu",          role: "Teacher",  status: "active",   emailLink: true  },
+        { id: 4,  name: "David Kim",           email: "david.kim@school.edu",             role: "Teacher",  status: "active",   emailLink: false },
+        { id: 5,  name: "Sofia Rossi",         email: "sofia.rossi@school.edu",           role: "Teacher",  status: "inactive", emailLink: false },
+        { id: 6,  name: "Liam Smith",          email: "liam.smith1@school.edu",           role: "Student",  status: "Inactive", emailLink: true  },
+        { id: 7,  name: "Olivia Brown",        email: "olivia.brown2@school.edu",         role: "Student",  status: "active",   emailLink: false },
+        { id: 8,  name: "Noah Miller",         email: "noah.miller3@school.edu",          role: "Student",  status: "active",   emailLink: false },
+        { id: 9,  name: "Emma Martinez",       email: "emma.martinez4@school.edu",        role: "Student",  status: "active",   emailLink: false },
+        { id: 10, name: "Oliver Wilson",       email: "oliver.wilson5@school.edu",        role: "Student",  status: "active",   emailLink: true  },
+        { id: 11, name: "Ava Taylor",          email: "ava.taylor6@school.edu",           role: "Student",  status: "active",   emailLink: true  },
+        { id: 12, name: "Elijah Martin",       email: "elijah.martin7@school.edu",        role: "Student",  status: "active",   emailLink: false },
+        { id: 13, name: "Charlotte Thompson",  email: "charlotte.thompson8@school.edu",   role: "Student",  status: "active",   emailLink: false },
+        { id: 14, name: "William Sanchez",     email: "william.sanchez9@school.edu",      role: "Student",  status: "active",   emailLink: false },
+        { id: 15, name: "Sophia Lewis",        email: "sophia.lewis10@school.edu",        role: "Student",  status: "active",   emailLink: true  },
+        { id: 16, name: "James Smith",         email: "james.smith11@school.edu",         role: "Student",  status: "active",   emailLink: false },
+        { id: 17, name: "Amelia Brown",        email: "amelia.brown12@school.edu",        role: "Student",  status: "inactive", emailLink: false },
+        { id: 18, name: "Benjamin Miller",     email: "benjamin.miller13@school.edu",     role: "Student",  status: "active",   emailLink: true  },
+        { id: 19, name: "Isabella Martinez",   email: "isabella.martinez14@school.edu",   role: "Student",  status: "active",   emailLink: false },
+        { id: 20, name: "Lucas Wilson",        email: "lucas.wilson15@school.edu",        role: "Student",  status: "active",   emailLink: true  },
+        { id: 21, name: "Mia Taylor",          email: "mia.taylor16@school.edu",          role: "Student",  status: "active",   emailLink: false },
+        { id: 22, name: "Henry Martin",        email: "henry.martin17@school.edu",        role: "Student",  status: "active",   emailLink: true  },
+        { id: 23, name: "Evelyn Thompson",     email: "evelyn.thompson18@school.edu",     role: "Student",  status: "active",   emailLink: false },
+        { id: 24, name: "Alexander Sanchez",   email: "alexander.sanchez19@school.edu",   role: "Student",  status: "active",   emailLink: false },
+        { id: 25, name: "Harper Lewis",        email: "harper.lewis20@school.edu",        role: "Student",  status: "active",   emailLink: true  },
+        { id: 26, name: "Ada Admin",           email: "admin@example.com",                role: "Admin",    status: "active",   emailLink: false },
+    ];
+
+    let editingId = null;
+    let deletingId = null;
+
+    // ── Role badge ────────────────────────────────────────────────────────────────
+    function roleBadge(role) {
+        const map = {
+            Teacher: "bg-teal-50 text-teal-600 border border-teal-200",
+            Student: "bg-green-50 text-green-600 border border-green-200",
+            Admin:   "bg-blue-50  text-blue-600  border border-blue-200",
+        };
+        const cls = map[role] || "bg-gray-100 text-gray-500 border border-gray-200";
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${cls}">${role}</span>`;
+    }
+
+    // ── Status badge ──────────────────────────────────────────────────────────────
+    function statusBadge(status) {
+        const isActive = status.toLowerCase() === "active";
+        const cls = isActive
+            ? "border border-green-300 text-green-600 bg-green-50"
+            : "border border-gray-300 text-gray-500 bg-gray-50";
+        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${cls}">${status}</span>`;
+    }
+
+    // ── Render ────────────────────────────────────────────────────────────────────
+    function renderTable() {
+        const tbody = document.getElementById("usersTableBody");
+        tbody.innerHTML = "";
+
+        users.forEach((u, idx) => {
+            const isLast = idx === users.length - 1;
+            const row = document.createElement("div");
+            row.className = "group grid gap-4 items-center px-6 py-3.5 hover:bg-gray-50/60 transition-colors" + (isLast ? "" : " border-b border-gray-100");
+            row.style.gridTemplateColumns = "1.6fr 2fr 140px 120px";
+
+            // Name cell
+            const nameCell = document.createElement("div");
+            nameCell.innerHTML = `<span class="text-sm font-semibold text-gray-800">${u.name}</span>`;
+
+            // Email cell
+            const emailCell = document.createElement("div");
+            if (u.emailLink) {
+                emailCell.innerHTML = `<a href="mailto:${u.email}" class="text-sm text-blue-500 hover:text-blue-700 transition-colors">${u.email}</a>`;
+            } else {
+                emailCell.innerHTML = `<span class="text-sm text-gray-500">${u.email}</span>`;
+            }
+
+            // Role cell
+            const roleCell = document.createElement("div");
+            roleCell.innerHTML = roleBadge(u.role);
+
+            // Status cell  (badge + hover actions)
+            const statusCell = document.createElement("div");
+            statusCell.className = "flex items-center gap-2";
+            statusCell.innerHTML = `
+                ${statusBadge(u.status)}
+                <div class="hidden group-hover:flex items-center gap-1 ml-1">
+                    <button onclick="openEdit(${u.id})"
+                            title="Edit"
+                            class="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
+                    <button onclick="openDelete(${u.id})"
+                            title="Delete"
+                            class="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                    </button>
+                </div>`;
+
+            row.appendChild(nameCell);
+            row.appendChild(emailCell);
+            row.appendChild(roleCell);
+            row.appendChild(statusCell);
+            tbody.appendChild(row);
+        });
+    }
+
+    // ── Edit ──────────────────────────────────────────────────────────────────────
+    function openEdit(id) {
+        const u = users.find(x => x.id === id);
+        if (!u) return;
+        editingId = id;
+        document.getElementById("editName").value   = u.name;
+        document.getElementById("editEmail").value  = u.email;
+        document.getElementById("editRole").value   = u.role;
+        document.getElementById("editStatus").value = u.status.toLowerCase();
+        openModal("editModal");
+    }
+
+    function saveEdit() {
+        const u = users.find(x => x.id === editingId);
+        if (!u) return;
+        u.name   = document.getElementById("editName").value.trim()  || u.name;
+        u.email  = document.getElementById("editEmail").value.trim() || u.email;
+        u.role   = document.getElementById("editRole").value;
+        u.status = document.getElementById("editStatus").value;
+        closeModal("editModal");
+        renderTable();
+        showToast("User updated successfully!");
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────────────
+    function openDelete(id) {
+        const u = users.find(x => x.id === id);
+        if (!u) return;
+        deletingId = id;
+        document.getElementById("deleteUserName").textContent = u.name;
+        openModal("deleteModal");
+    }
+
+    function confirmDelete() {
+        users = users.filter(x => x.id !== deletingId);
+        closeModal("deleteModal");
+        renderTable();
+        showToast("User deleted.");
+    }
+
+    // ── Modal helpers ─────────────────────────────────────────────────────────────
+    function openModal(id) {
+        const el = document.getElementById(id);
+        el.classList.remove("hidden");
+        el.classList.add("flex");
+    }
+
+    function closeModal(id) {
+        const el = document.getElementById(id);
+        el.classList.add("hidden");
+        el.classList.remove("flex");
+    }
+
+    // Close modals on backdrop click
+    ["editModal", "deleteModal"].forEach(id => {
+        document.getElementById(id).addEventListener("click", function (e) {
+            if (e.target === this) closeModal(id);
+        });
+    });
+
+    // ── Toast ─────────────────────────────────────────────────────────────────────
+    function showToast(msg) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toastMessage").textContent = msg;
+        toast.classList.remove("hidden");
+        toast.classList.add("flex");
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.classList.remove("flex");
+        }, 3000);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────────
+    renderTable();
+</script>
+}

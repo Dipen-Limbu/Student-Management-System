@@ -74,32 +74,45 @@ namespace Student_Management_System.Controllers
 
         // --- Admin Student Management CRUD ---
 
-        public async Task<IActionResult> Index(string searchString, string status, string course)
+        public IActionResult Index(string searchString, string status, string course)
         {
-            var studentsQuery = _context.Students.AsQueryable();
+            var students = new List<Student>
+            {
+                new Student { StudentId = 1, FullName = "Liam Smith", Email = "liam.smith1@school.edu", RollNo = "2024-1000", Course = "CS101", Semester = "1", Status = "inactive" },
+                new Student { StudentId = 2, FullName = "Olivia Brown", Email = "olivia.brown2@school.edu", RollNo = "2024-1001", Course = "MA201", Semester = "2", Status = "active" },
+                new Student { StudentId = 3, FullName = "Noah Miller", Email = "noah.miller3@school.edu", RollNo = "2024-1002", Course = "PH110", Semester = "3", Status = "active" },
+                new Student { StudentId = 4, FullName = "Emma Martinez", Email = "emma.martinez4@school.edu", RollNo = "2024-1003", Course = "EN105", Semester = "4", Status = "active" },
+                new Student { StudentId = 5, FullName = "Oliver Wilson", Email = "oliver.wilson5@school.edu", RollNo = "2024-1004", Course = "BUS220", Semester = "5", Status = "active" },
+                new Student { StudentId = 6, FullName = "Ava Taylor", Email = "ava.taylor6@school.edu", RollNo = "2024-1005", Course = "DS301", Semester = "6", Status = "active" },
+                new Student { StudentId = 7, FullName = "Elijah Martin", Email = "elijah.martin7@school.edu", RollNo = "2024-1006", Course = "CS101", Semester = "7", Status = "active" },
+                new Student { StudentId = 8, FullName = "Charlotte Thompson", Email = "charlotte.thompson8@school.edu", RollNo = "2024-1007", Course = "MA201", Semester = "1", Status = "active" },
+                new Student { StudentId = 9, FullName = "William Sanchez", Email = "william.sanchez9@school.edu", RollNo = "2024-1008", Course = "PH110", Semester = "2", Status = "active" },
+                new Student { StudentId = 10, FullName = "Sophia Lewis", Email = "sophia.lewis10@school.edu", RollNo = "2024-1009", Course = "EN105", Semester = "3", Status = "active" },
+                new Student { StudentId = 11, FullName = "James Smith", Email = "james.smith11@school.edu", RollNo = "2024-1010", Course = "BUS220", Semester = "4", Status = "active" },
+                new Student { StudentId = 12, FullName = "Amelia Brown", Email = "amelia.brown12@school.edu", RollNo = "2024-1011", Course = "DS301", Semester = "5", Status = "inactive" },
+                new Student { StudentId = 13, FullName = "Benjamin Miller", Email = "benjamin.miller13@school.edu", RollNo = "2024-1012", Course = "CS101", Semester = "6", Status = "active" },
+                new Student { StudentId = 14, FullName = "Isabella Martinez", Email = "isabella.martinez14@school.edu", RollNo = "2024-1013", Course = "MA201", Semester = "7", Status = "active" },
+                new Student { StudentId = 15, FullName = "Lucas Wilson", Email = "lucas.wilson15@school.edu", RollNo = "2024-1014", Course = "PH110", Semester = "1", Status = "active" },
+                new Student { StudentId = 16, FullName = "Mia Taylor", Email = "mia.taylor16@school.edu", RollNo = "2024-1015", Course = "EN105", Semester = "2", Status = "active" },
+                new Student { StudentId = 17, FullName = "Henry Martin", Email = "henry.martin17@school.edu", RollNo = "2024-1016", Course = "BUS220", Semester = "3", Status = "active" },
+                new Student { StudentId = 18, FullName = "Evelyn Thompson", Email = "evelyn.thompson18@school.edu", RollNo = "2024-1017", Course = "DS301", Semester = "4", Status = "active" },
+                new Student { StudentId = 19, FullName = "Alexander Sanchez", Email = "alexander.sanchez19@school.edu", RollNo = "2024-1018", Course = "CS101", Semester = "5", Status = "active" },
+                new Student { StudentId = 20, FullName = "Harper Lewis", Email = "harper.lewis20@school.edu", RollNo = "2024-1019", Course = "MA201", Semester = "6", Status = "active" }
+            };
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                studentsQuery = studentsQuery.Where(s => s.FullName.Contains(searchString) || 
-                                                         s.Email.Contains(searchString) || 
-                                                         s.RollNo.Contains(searchString));
+                students = students.Where(s => s.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || 
+                                               s.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) || 
+                                               s.RollNo.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            var students = await studentsQuery.ToListAsync();
-            
-            // Populate dummy fields for UI display to match design
-            foreach(var s in students)
-            {
-                s.Course = s.Course ?? "CS101"; 
-                s.Semester = s.Semester ?? "1";
-                s.Status = s.Status ?? "active";
-            }
-
-            if (!string.IsNullOrEmpty(status) && status != "All statuses")
+            if (!string.IsNullOrEmpty(status))
             {
                 students = students.Where(s => s.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
             }
-            if (!string.IsNullOrEmpty(course) && course != "All courses")
+
+            if (!string.IsNullOrEmpty(course))
             {
                 students = students.Where(s => s.Course.Equals(course, StringComparison.OrdinalIgnoreCase)).ToList();
             }

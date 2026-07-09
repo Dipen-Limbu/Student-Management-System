@@ -221,15 +221,18 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         
-        // Show Toast
-        setTimeout(() => {
-            const toast = document.getElementById('toast');
-            toast.classList.remove('translate-y-20', 'opacity-0');
-        }, 500);
-        setTimeout(() => {
-            const toast = document.getElementById('toast');
-            if(toast) toast.classList.add('translate-y-20', 'opacity-0');
-        }, 5000);
+        // Show Toast only once per login session
+        if (!sessionStorage.getItem('welcomeShown')) {
+            setTimeout(() => {
+                const toast = document.getElementById('toast');
+                if (toast) toast.classList.remove('translate-y-20', 'opacity-0');
+            }, 500);
+            setTimeout(() => {
+                const toast = document.getElementById('toast');
+                if (toast) toast.classList.add('translate-y-20', 'opacity-0');
+            }, 5000);
+            sessionStorage.setItem('welcomeShown', 'true');
+        }
 
         // Chart.js Configuration
         const ctxEnrollment = document.getElementById('enrollmentChart').getContext('2d');

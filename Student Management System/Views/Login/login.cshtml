@@ -1,4 +1,4 @@
-﻿
+
 @model UserEdit
 
 @{
@@ -434,6 +434,9 @@
     </div>
     <!-- Password visibility toggle script -->
     <script>
+            // Clear welcome prompt session state on login screen load
+            sessionStorage.removeItem('welcomeShown');
+
             const togglePassword = document.querySelector('#togglePassword');
             const password = document.querySelector('#password');
             togglePassword.addEventListener('click', function () {
