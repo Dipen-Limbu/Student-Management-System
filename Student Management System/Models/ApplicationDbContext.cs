@@ -27,6 +27,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Subject> Subjects { get; set; }
 
+    public virtual DbSet<Teacher> Teachers { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -115,6 +117,25 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("FK__Subjects__Course__534D60F1");
         });
 
+        modelBuilder.Entity<Teacher>(entity =>
+        {
+            entity.HasKey(e => e.TeacherId).HasName("PK__Teachers__TeacherId");
+
+            entity.ToTable("Teachers");
+
+            entity.Property(e => e.Name).HasMaxLength(100);
+            entity.Property(e => e.Email).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(20);
+            entity.Property(e => e.Address).HasMaxLength(255);
+            entity.Property(e => e.Department).HasMaxLength(100);
+
+            entity.HasOne<User>()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .HasConstraintName("FK__Teachers__UserId")
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("PK__Users__1788CC4CCB1E4E92");
@@ -124,6 +145,7 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.PasswordHash).HasMaxLength(256);
             entity.Property(e => e.Role).HasMaxLength(20);
             entity.Property(e => e.Username).HasMaxLength(50);
+            entity.Property(e => e.FullName).HasMaxLength(200);
         });
 
         OnModelCreatingPartial(modelBuilder);

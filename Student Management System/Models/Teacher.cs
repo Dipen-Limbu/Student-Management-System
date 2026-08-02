@@ -6,23 +6,32 @@ namespace Student_Management_System.Models
     public class Teacher
     {
         public int TeacherId { get; set; }
-        
+
         [Required, StringLength(100)]
-        public string FullName { get; set; } = null!;
-        
+        public string Name { get; set; } = null!;      // column is "Name" in DB
+
+        public int? UserId { get; set; }               // FK to Users table
+
         [StringLength(100)]
         public string? Email { get; set; }
-        
+
         [StringLength(20)]
         public string? Phone { get; set; }
-        
+
+        [StringLength(255)]
+        public string? Address { get; set; }
+
         [StringLength(100)]
         public string? Department { get; set; }
-        
-        [StringLength(20)]
+
+        // --- Not mapped to DB (kept for admin list UI compatibility) ---
+        [NotMapped]
+        public string FullName => Name;                // alias so existing views still work
+
+        [NotMapped]
         public string? Status { get; set; }
-        
-        [StringLength(255)]
+
+        [NotMapped]
         public string? Courses { get; set; }
 
         [NotMapped]
@@ -30,8 +39,8 @@ namespace Student_Management_System.Models
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(FullName)) return "T";
-                var parts = FullName.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
+                if (string.IsNullOrWhiteSpace(Name)) return "T";
+                var parts = Name.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length == 1) return parts[0][..1].ToUpper();
                 return (parts[0][..1] + parts[^1][..1]).ToUpper();
             }
