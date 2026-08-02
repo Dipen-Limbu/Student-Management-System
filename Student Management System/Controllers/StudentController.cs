@@ -5,6 +5,7 @@ using Student_Management_System.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Student_Management_System.Controllers
@@ -47,24 +48,68 @@ namespace Student_Management_System.Controllers
             return View(model);
         }
 
+        // Helper: get the Student record for the currently logged-in user
+        private Student? GetCurrentStudent()
+        {
+            var username = User.Identity?.Name;          // email stored at login
+            if (string.IsNullOrEmpty(username)) return null;
+            return _context.Students.FirstOrDefault(s => s.Email == username);
+        }
+
         public IActionResult MyCourse()
         {
-            return View();
+            var student = GetCurrentStudent();
+            // Load all courses the student is enrolled in
+            List<Course> courses = new();
+            if (student != null)
+            {
+                courses = _context.Enrollments
+                    .Where(e => e.StudentId == student.StudentId)
+                    .Include(e => e.Course)
+                    .ThenInclude(c => c!.Subjects)
+                    .Select(e => e.Course!)
+                    .ToList();
+            }
+            ViewBag.Student = student;
+            return View(courses);
         }
 
         public IActionResult MyClass()
         {
-            return View();
+            var student = GetCurrentStudent();
+            // Load enrollment details (course info acts as class info)
+            List<Enrollment> enrollments = new();
+            if (student != null)
+            {
+                enrollments = _context.Enrollments
+                    .Where(e => e.StudentId == student.StudentId)
+                    .Include(e => e.Course)
+                    .OrderByDescending(e => e.EnrolledOn)
+                    .ToList();
+            }
+            ViewBag.Student = student;
+            return View(enrollments);
         }
 
         public IActionResult Attendance()
         {
-            return View();
+            var student = GetCurrentStudent();
+            List<Attendance> records = new();
+            if (student != null)
+            {
+                records = _context.Attendances
+                    .Where(a => a.StudentId == student.StudentId)
+                    .OrderByDescending(a => a.Date)
+                    .ToList();
+            }
+            ViewBag.Student = student;
+            return View(records);
         }
 
         public IActionResult Profile()
         {
-            return View();
+            var student = GetCurrentStudent();
+            return View(student);
         }
 
         public IActionResult ChangePassword()

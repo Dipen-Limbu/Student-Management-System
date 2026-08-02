@@ -1,15 +1,69 @@
+@model List<Student_Management_System.Models.Enrollment>
+
 @{
     ViewData["Title"] = "My Class";
     Layout = "~/Views/Shared/_StudentLayout.cshtml";
+    var student = ViewBag.Student as Student_Management_System.Models.Student;
 }
 
 <div class="max-w-6xl">
     <div class="mb-8">
         <h2 class="text-2xl font-bold text-textDark mb-1">My Class</h2>
-        <p class="text-textMuted">View your class schedule and classmates.</p>
+        <p class="text-textMuted">Your enrolled classes and schedule.</p>
     </div>
-    
-    <div class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm flex items-center justify-center min-h-[300px]">
-        <p class="text-textMuted">Class details will be displayed here.</p>
-    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center justify-center py-24">
+            <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-400 flex items-center justify-center mb-4">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-textDark mb-1">No classes found</h3>
+            <p class="text-sm text-textMuted">You have not been enrolled in any class yet.</p>
+        </div>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @{
+                var colors = new[] {
+                    ("#3b82f6", "bg-blue-50",   "text-blue-600"),
+                    ("#6366f1", "bg-indigo-50", "text-indigo-600"),
+                    ("#0891b2", "bg-cyan-50",   "text-cyan-600"),
+                    ("#7c3aed", "bg-violet-50", "text-violet-600"),
+                };
+                int i = 0;
+            }
+            @foreach (var enrollment in Model)
+            {
+                var (hex, bg, txt) = colors[i++ % colors.Length];
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                    <div class="h-1.5 w-full" style="background-color: @hex;"></div>
+                    <div class="p-5 flex flex-col flex-1">
+                        <!-- Course badge + name -->
+                        <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-md mb-3 @bg @txt">
+                            Course #@enrollment.CourseId
+                        </span>
+                        <h3 class="text-base font-bold text-textDark mb-1">
+                            @(enrollment.Course?.CourseName ?? "—")
+                        </h3>
+                        @if (!string.IsNullOrWhiteSpace(enrollment.Course?.Duration))
+                        {
+                            <p class="text-sm @txt mb-3">@enrollment.Course.Duration</p>
+                        }
+
+                        <div class="mt-auto pt-3 border-t border-gray-50 text-xs text-textMuted">
+                            Enrolled on:
+                            <span class="font-medium text-textDark">
+                                @(enrollment.EnrolledOn?.ToString("dd MMM yyyy") ?? "—")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>

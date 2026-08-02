@@ -1,5 +1,99 @@
+@model List<Student_Management_System.Models.ClassViewModel>
+
 @{
     ViewData["Title"] = "My Classes";
     Layout = "~/Views/Shared/_TeacherLayout.cshtml";
 }
-<div class="max-w-6xl"><h2>My Classes Placeholder</h2></div>
+
+<div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-textDark mb-1">My classes</h2>
+        <p class="text-textMuted text-sm">Classes assigned to you this term</p>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-400 flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-textDark mb-1">No classes found</h3>
+            <p class="text-sm text-textMuted">No courses are available in the database yet.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Class Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            @{
+                // Cycle through banner accent colours for variety
+                var accentColors = new[]
+                {
+                    ("bg-blue-50",   "text-blue-600",   "#3b82f6"),
+                    ("bg-indigo-50", "text-indigo-600", "#6366f1"),
+                    ("bg-cyan-50",   "text-cyan-600",   "#0891b2"),
+                    ("bg-violet-50", "text-violet-600", "#7c3aed"),
+                    ("bg-emerald-50","text-emerald-600","#059669"),
+                    ("bg-orange-50", "text-orange-600", "#ea580c"),
+                };
+                int idx = 0;
+            }
+            @foreach (var cls in Model)
+            {
+                var (bgAccent, textAccent, hexColor) = accentColors[idx % accentColors.Length];
+                idx++;
+                int pct = cls.Capacity > 0 ? (int)((float)cls.EnrolledStudents / cls.Capacity * 100) : 0;
+                if (pct > 100) pct = 100;
+
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 flex flex-col">
+                    <!-- Card top accent strip -->
+                    <div class="h-1.5 w-full" style="background-color: @hexColor;"></div>
+
+                    <div class="p-5 flex flex-col flex-1">
+                        <!-- Course code badge + title -->
+                        <div class="mb-3">
+                            <span class="inline-block text-xs font-semibold px-2 py-0.5 rounded-md mb-2 @bgAccent @textAccent">
+                                @cls.ClassName
+                            </span>
+                            <h3 class="text-base font-bold text-textDark leading-snug">@cls.ClassName</h3>
+                        </div>
+
+                        <!-- Meta info row -->
+                        <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm @textAccent mb-4">
+                            @if (!string.IsNullOrWhiteSpace(cls.Room))
+                            {
+                                <span>@cls.Room</span>
+                                <span class="text-gray-300">·</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(cls.Section))
+                            {
+                                <span>Section @cls.Section</span>
+                                <span class="text-gray-300">·</span>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(cls.Semester))
+                            {
+                                <span>@cls.Semester</span>
+                            }
+                        </div>
+
+                        <!-- Enrollment progress bar -->
+                        <div class="mt-auto">
+                            <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full transition-all duration-500"
+                                     style="width: @pct%; background-color: @hexColor;"></div>
+                            </div>
+                            <p class="text-xs text-textMuted mt-1.5">
+                                @cls.EnrolledStudents / @cls.Capacity enrolled
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

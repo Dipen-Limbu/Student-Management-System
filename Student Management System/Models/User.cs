@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Student_Management_System.Models;
@@ -12,4 +12,6 @@ public partial class User
     public string PasswordHash { get; set; } = null!;
 
     public string Role { get; set; } = null!;
+
+    public string? FullName { get; set; }
 }

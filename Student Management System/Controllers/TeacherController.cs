@@ -1,26 +1,25 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Student_Management_System.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Student_Management_System.Controllers
 {
     [Authorize]
     public class TeacherController : Controller
     {
-        // Static list to simulate a database for the UI presentation
-        // Replace with ApplicationDbContext _context when the Teacher table is created in the database.
-        private static List<Teacher> _teachers = new List<Teacher>
-        {
-            new Teacher { TeacherId = 1, FullName = "Emily Carter", Email = "emily.carter@school.edu", Phone = "+1 555 200 1201", Department = "Computer Science", Status = "active", Courses = "CS101, DS301" },
-            new Teacher { TeacherId = 2, FullName = "Michael Nguyen", Email = "michael.nguyen@school.edu", Phone = "+1 555 200 1202", Department = "Mathematics", Status = "active", Courses = "MA201" },
-            new Teacher { TeacherId = 3, FullName = "Priya Sharma", Email = "priya.sharma@school.edu", Phone = "+1 555 200 1203", Department = "Physics", Status = "active", Courses = "PH110" },
-            new Teacher { TeacherId = 4, FullName = "David Kim", Email = "david.kim@school.edu", Phone = "+1 555 200 1204", Department = "English", Status = "active", Courses = "EN105" },
-            new Teacher { TeacherId = 5, FullName = "Sofia Rossi", Email = "sofia.rossi@school.edu", Phone = "+1 555 200 1205", Department = "Business", Status = "inactive", Courses = "BUS220" }
-        };
+        private readonly ApplicationDbContext _context;
 
-        // --- Teacher Role Dashboard Actions ---
+        public TeacherController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        // ── Teacher Role Dashboard Actions ──────────────────────────────────
+
         public IActionResult Dashboard()
         {
             var model = new TeacherDashboardViewModel
@@ -34,26 +33,47 @@ namespace Student_Management_System.Controllers
             return View(model);
         }
 
-        public IActionResult MyClasses() { return View(); }
-        public IActionResult MyStudents() { return View(); }
-        public IActionResult Attendance() { return View(); }
-        public IActionResult Profile() { return View(); }
+        public IActionResult MyClasses()
+        {
+            var courses = _context.Courses
+                .Include(c => c.Enrollments)
+                .ToList();
+
+            var classes = courses.Select((c, i) => new ClassViewModel
+            {
+                ClassId          = c.CourseId,
+                ClassName        = c.CourseName,
+                CourseCode       = c.CourseName,
+                Semester         = c.Duration ?? "—",
+                Section          = "A",
+                EnrolledStudents = c.Enrollments.Count,
+                Capacity         = 40
+            }).ToList();
+
+            return View(classes);
+        }
+
+        public IActionResult MyStudents()   { return View(); }
+        public IActionResult Attendance()   { return View(); }
+        public IActionResult Profile()      { return View(); }
         public IActionResult ChangePassword() { return View(); }
 
-        // --- Admin Teacher Management CRUD ---
+        // ── Admin Teacher Management CRUD (now uses real DB) ────────────────
 
-        public IActionResult Index(string searchString)
+        public async Task<IActionResult> Index(string searchString)
         {
-            var teachersQuery = _teachers.AsEnumerable();
+            var query = _context.Teachers.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                teachersQuery = teachersQuery.Where(t => t.FullName.Contains(searchString, System.StringComparison.OrdinalIgnoreCase) || 
-                                                         (t.Email != null && t.Email.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)) ||
-                                                         (t.Department != null && t.Department.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)));
+                query = query.Where(t =>
+                    t.Name.Contains(searchString) ||
+                    (t.Email      != null && t.Email.Contains(searchString)) ||
+                    (t.Department != null && t.Department.Contains(searchString)));
             }
 
-            return View(teachersQuery.ToList());
+            ViewData["SearchString"] = searchString;
+            return View(await query.ToListAsync());
         }
 
         public IActionResult Create()
@@ -63,22 +83,22 @@ namespace Student_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Teacher teacher)
+        public async Task<IActionResult> Create(Teacher teacher)
         {
             if (ModelState.IsValid)
             {
-                teacher.TeacherId = _teachers.Any() ? _teachers.Max(t => t.TeacherId) + 1 : 1;
-                _teachers.Add(teacher);
+                _context.Teachers.Add(teacher);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(teacher);
         }
 
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher == null) return NotFound();
 
             return View(teacher);
@@ -86,42 +106,42 @@ namespace Student_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Teacher teacher)
+        public async Task<IActionResult> Edit(int id, Teacher teacher)
         {
             if (id != teacher.TeacherId) return NotFound();
 
             if (ModelState.IsValid)
             {
-                var existingTeacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
-                if (existingTeacher != null)
+                try
                 {
-                    existingTeacher.FullName = teacher.FullName;
-                    existingTeacher.Email = teacher.Email;
-                    existingTeacher.Phone = teacher.Phone;
-                    existingTeacher.Department = teacher.Department;
-                    existingTeacher.Status = teacher.Status;
-                    existingTeacher.Courses = teacher.Courses;
+                    _context.Update(teacher);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TeacherExists(teacher.TeacherId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(teacher);
         }
 
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.TeacherId == id);
             if (teacher == null) return NotFound();
 
             return View(teacher);
         }
 
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.TeacherId == id);
             if (teacher == null) return NotFound();
 
             return View(teacher);
@@ -129,14 +149,20 @@ namespace Student_Management_System.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher != null)
             {
-                _teachers.Remove(teacher);
+                _context.Teachers.Remove(teacher);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool TeacherExists(int id)
+        {
+            return _context.Teachers.Any(t => t.TeacherId == id);
         }
     }
 }
