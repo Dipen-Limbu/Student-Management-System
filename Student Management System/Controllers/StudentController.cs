@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Student_Management_System.Controllers
@@ -112,9 +114,49 @@ namespace Student_Management_System.Controllers
             return View(student);
         }
 
+        [HttpGet]
         public IActionResult ChangePassword()
         {
-            return View();
+            return View(new ChangePasswordViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var username = User.FindFirstValue(ClaimTypes.Name);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "User account not found.");
+                return View(model);
+            }
+
+            bool valid = user.PasswordHash == model.CurrentPassword ||
+                         HashSha256(model.CurrentPassword) == user.PasswordHash.ToLower();
+
+            if (!valid)
+            {
+                ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
+                return View(model);
+            }
+
+            user.PasswordHash = model.NewPassword;
+            _context.Users.Update(user);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Password changed successfully!";
+            return RedirectToAction(nameof(ChangePassword));
+        }
+
+        private static string HashSha256(string input)
+        {
+            using var sha = SHA256.Create();
+            return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(input))).ToLower();
         }
 
         // --- Admin Student Management CRUD ---

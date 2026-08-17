@@ -1,49 +1,55 @@
-using System.ComponentModel.DataAnnotations;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Student_Management_System.Models
+namespace Student_Management_System.Models;
+
+public partial class Teacher
 {
-    public class Teacher
+    // ── DB-mapped columns ─────────────────────────────────────────────────────
+    public int TeacherId { get; set; }
+
+    /// <summary>Maps to the Name column in the Teachers table.</summary>
+    public string? Name { get; set; }
+
+    public int UserId { get; set; }
+
+    public string? Phone { get; set; }
+
+    public string? Address { get; set; }
+
+    // ── Computed / UI-only properties (not stored in the DB) ─────────────────
+
+    /// <summary>Alias for Name — lets views and the controller use FullName.</summary>
+    [NotMapped]
+    public string? FullName
     {
-        public int TeacherId { get; set; }
+        get => Name;
+        set => Name = value;
+    }
 
-        [Required, StringLength(100)]
-        public string Name { get; set; } = null!;      // column is "Name" in DB
+    /// <summary>Not yet in the Teachers table — used by the UI only.</summary>
+    [NotMapped]
+    public string? Email { get; set; }
 
-        public int? UserId { get; set; }               // FK to Users table
+    [NotMapped]
+    public string? Department { get; set; }
 
-        [StringLength(100)]
-        public string? Email { get; set; }
+    [NotMapped]
+    public string? Status { get; set; }
 
-        [StringLength(20)]
-        public string? Phone { get; set; }
+    [NotMapped]
+    public string? Courses { get; set; }
 
-        [StringLength(255)]
-        public string? Address { get; set; }
-
-        [StringLength(100)]
-        public string? Department { get; set; }
-
-        // --- Not mapped to DB (kept for admin list UI compatibility) ---
-        [NotMapped]
-        public string FullName => Name;                // alias so existing views still work
-
-        [NotMapped]
-        public string? Status { get; set; }
-
-        [NotMapped]
-        public string? Courses { get; set; }
-
-        [NotMapped]
-        public string Initials
+    [NotMapped]
+    public string Initials
+    {
+        get
         {
-            get
-            {
-                if (string.IsNullOrWhiteSpace(Name)) return "T";
-                var parts = Name.Split(' ', System.StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length == 1) return parts[0][..1].ToUpper();
-                return (parts[0][..1] + parts[^1][..1]).ToUpper();
-            }
+            if (string.IsNullOrWhiteSpace(Name)) return "T";
+            var parts = Name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 1) return parts[0][..1].ToUpper();
+            return (parts[0][..1] + parts[^1][..1]).ToUpper();
         }
     }
 }
