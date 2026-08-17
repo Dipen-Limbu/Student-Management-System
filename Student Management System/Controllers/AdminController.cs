@@ -1,14 +1,22 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
 using Student_Management_System.Models;
 using System.Collections.Generic;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Student_Management_System.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public AdminController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
         public IActionResult Dashboard()
         {
             var model = new AdminDashboardViewModel
@@ -68,5 +76,55 @@ namespace Student_Management_System.Controllers
             return View(model);
         }
         public IActionResult Settings() { return View(); }
+
+        // GET: /Admin/ChangePassword
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordViewModel());
+        }
+
+        // POST: /Admin/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var username = User.FindFirstValue(ClaimTypes.Name);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
+            if (user == null)
+            {
+                ModelState.AddModelError(string.Empty, "User account not found.");
+                return View(model);
+            }
+
+            // Verify current password (plain-text or SHA-256)
+            bool valid = user.PasswordHash == model.CurrentPassword ||
+                         HashPassword(model.CurrentPassword) == user.PasswordHash.ToLower();
+
+            if (!valid)
+            {
+                ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
+                return View(model);
+            }
+
+            // Save new password as plain text (consistent with existing seeded users)
+            user.PasswordHash = model.NewPassword;
+            _context.Users.Update(user);
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Password changed successfully!";
+            return RedirectToAction(nameof(ChangePassword));
+        }
+
+        private static string HashPassword(string password)
+        {
+            using var sha = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(password);
+            return Convert.ToHexString(sha.ComputeHash(bytes)).ToLower();
+        }
     }
 }

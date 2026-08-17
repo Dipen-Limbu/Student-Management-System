@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,10 +6,6 @@ namespace Student_Management_System.Models;
 
 public partial class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext()
-    {
-    }
-
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
@@ -30,9 +26,6 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<Teacher> Teachers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:dbConn");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,21 +112,8 @@ public partial class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Teacher>(entity =>
         {
-            entity.HasKey(e => e.TeacherId).HasName("PK__Teachers__TeacherId");
-
-            entity.ToTable("Teachers");
-
-            entity.Property(e => e.Name).HasMaxLength(100);
-            entity.Property(e => e.Email).HasMaxLength(100);
-            entity.Property(e => e.Phone).HasMaxLength(20);
-            entity.Property(e => e.Address).HasMaxLength(255);
-            entity.Property(e => e.Department).HasMaxLength(100);
-
-            entity.HasOne<User>()
-                .WithMany()
-                .HasForeignKey(e => e.UserId)
-                .HasConstraintName("FK__Teachers__UserId")
-                .OnDelete(DeleteBehavior.SetNull);
+            entity.Property(e => e.Name).HasMaxLength(50);
+            entity.Property(e => e.Phone).HasMaxLength(50);
         });
 
         modelBuilder.Entity<User>(entity =>
@@ -142,10 +122,10 @@ public partial class ApplicationDbContext : DbContext
 
             entity.HasIndex(e => e.Username, "UQ__Users__536C85E4D76FC159").IsUnique();
 
+            entity.Property(e => e.FullName).HasMaxLength(100);
             entity.Property(e => e.PasswordHash).HasMaxLength(256);
             entity.Property(e => e.Role).HasMaxLength(20);
             entity.Property(e => e.Username).HasMaxLength(50);
-            entity.Property(e => e.FullName).HasMaxLength(200);
         });
 
         OnModelCreatingPartial(modelBuilder);

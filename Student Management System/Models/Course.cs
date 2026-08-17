@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Student_Management_System.Models;
 
 public partial class Course
 {
+    // ── DB-mapped columns ─────────────────────────────────────────────────────
     public int CourseId { get; set; }
 
     public string CourseName { get; set; } = null!;
@@ -15,21 +17,21 @@ public partial class Course
 
     public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    // ── UI-only / computed properties ─────────────────────────────────────────
+
+    /// <summary>Short course code (maps to CourseName if no separate column exists).</summary>
+    [NotMapped]
     public string? CourseCode { get; set; }
-    
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+
+    [NotMapped]
     public string? Description { get; set; }
-    
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+
+    [NotMapped]
     public int? Credits { get; set; }
-    
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+
+    [NotMapped]
     public int? EnrolledStudents { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [NotMapped]
     public string? BannerColor { get; set; }
 }
-
-
-// maadey vaile  first time commit gareko

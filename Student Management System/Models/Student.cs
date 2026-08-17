@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Student_Management_System.Models;
 
 public partial class Student
 {
+    // ── DB-mapped columns ─────────────────────────────────────────────────────
     public int StudentId { get; set; }
 
     public string FullName { get; set; } = null!;
@@ -27,16 +29,18 @@ public partial class Student
 
     public virtual ICollection<Mark> Marks { get; set; } = new List<Mark>();
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    // ── UI-only / computed properties ─────────────────────────────────────────
+
+    [NotMapped]
     public string? Course { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [NotMapped]
     public string? Semester { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [NotMapped]
     public string? Status { get; set; }
 
-    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    [NotMapped]
     public string Initials
     {
         get
