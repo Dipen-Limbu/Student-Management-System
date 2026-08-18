@@ -111,6 +111,16 @@ namespace Student_Management_System.Controllers
         public IActionResult Profile()
         {
             var student = GetCurrentStudent();
+            if (student == null)
+            {
+                // Fallback if student details aren't fully seeded in the Students table yet
+                student = new Student
+                {
+                    FullName = User.FindFirst("FullName")?.Value ?? "Student",
+                    Email = User.Identity?.Name,
+                    RollNo = "N/A"
+                };
+            }
             return View(student);
         }
 

@@ -66,7 +66,29 @@ namespace Student_Management_System.Controllers
         }
         public IActionResult MyStudents() { return View(); }
         public IActionResult Attendance() { return View(); }
-        public IActionResult Profile() { return View(); }
+        public IActionResult Profile() 
+        { 
+            Teacher? teacher = null;
+            if (int.TryParse(User.FindFirst("UserId")?.Value, out int userId))
+            {
+                teacher = _context.Teachers.FirstOrDefault(t => t.UserId == userId);
+            }
+            
+            if (teacher == null)
+            {
+                teacher = new Teacher 
+                { 
+                    Name = User.FindFirst("FullName")?.Value ?? "Teacher", 
+                    Email = User.Identity?.Name 
+                };
+            }
+            else
+            {
+                teacher.Email = User.Identity?.Name;
+            }
+            
+            return View(teacher); 
+        }
 
         [HttpGet]
         public IActionResult ChangePassword()

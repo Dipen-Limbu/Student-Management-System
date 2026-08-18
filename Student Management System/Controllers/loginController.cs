@@ -77,10 +77,18 @@ namespace Student_Management_System.Controllers
                 return View();
             }
 
+            var fullName = user.FullName;
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                // Fallback to username without domain if it's an email, or just the username
+                fullName = user.Username.Contains('@') ? user.Username.Split('@')[0] : user.Username;
+            }
+
             // Authentication Cookie Setup
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
+                new Claim("FullName", fullName),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim("UserId", user.UserId.ToString())
             };
