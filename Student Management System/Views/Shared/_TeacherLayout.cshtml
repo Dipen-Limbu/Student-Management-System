@@ -1,3 +1,9 @@
+@using System.Security.Claims
+@{
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Teacher";
+    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Teacher";
+    var initials = string.Join("", fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpper();
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -121,13 +127,13 @@
             </div>
             
             <!-- Profile -->
-            <div class="flex items-center gap-3 cursor-pointer">
-                <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-200">
-                    TT
+            <div class="flex items-center gap-3 border border-gray-200 rounded-full p-1 pr-4 bg-white cursor-pointer hover:shadow-sm transition-shadow">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                    @initials
                 </div>
                 <div class="flex flex-col">
-                    <span class="text-sm font-semibold leading-none mb-1">Tom Teacher</span>
-                    <span class="text-xs text-textMuted leading-none">Teacher</span>
+                    <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
+                    <span class="text-xs text-textMuted leading-none">@role</span>
                 </div>
             </div>
         </div>
@@ -179,11 +185,11 @@
                 <!-- User card at bottom of sidebar -->
                 <div class="flex items-center gap-3 px-4 py-2">
                     <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-200">
-                        TT
+                        @initials
                     </div>
                     <div class="flex flex-col">
-                        <span class="text-sm font-semibold leading-none mb-1">Tom Teacher</span>
-                        <span class="text-xs text-textMuted leading-none">Teacher</span>
+                        <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
+                        <span class="text-xs text-textMuted leading-none">@role</span>
                     </div>
                 </div>
                 <a asp-controller="Login" asp-action="Logout" class="flex items-center gap-3 px-4 py-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-full transition-colors text-sm font-medium w-full">

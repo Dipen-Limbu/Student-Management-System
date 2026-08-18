@@ -51,12 +51,18 @@ namespace Student_Management_System.Controllers
         public IActionResult Users() { return View(); }
         public IActionResult Profile() 
         { 
+            var username = User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            
+            var fullName = User.FindFirst("FullName")?.Value ?? "Admin";
+            var parts = fullName.Split(' ');
+
             var model = new AdminProfileViewModel
             {
-                FirstName = "Ada",
-                LastName = "Admin",
-                Email = "admin@example.com",
-                Phone = "+1 555 010 1000",
+                FirstName = parts[0],
+                LastName = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "",
+                Email = user?.Username ?? "",
+                Phone = "+1 555 010 1000", // Placeholder since we don't store Admin phone yet
                 Role = "Admin"
             };
             return View(model); 
