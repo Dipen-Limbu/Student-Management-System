@@ -1,4 +1,4 @@
-﻿@model Student_Management_System.Models.User
+@model Student_Management_System.Models.User
 
 @{
     Layout = null;
@@ -344,6 +344,13 @@
                     <label class="form-label" for="Phone">Phone</label>
                     <input type="tel" id="Phone" name="Phone"
                            autocomplete="tel" class="glass-input" placeholder="9812300000" />
+                </div>
+
+                <!-- Address -->
+                <div class="form-group">
+                    <label class="form-label" for="Address">Address</label>
+                    <input type="text" id="Address" name="Address"
+                           autocomplete="street-address" class="glass-input" placeholder="Kathmandu, Nepal" />
                 </div>
 
                 <!-- Password + Confirm -->

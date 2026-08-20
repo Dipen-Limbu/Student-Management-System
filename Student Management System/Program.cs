@@ -39,7 +39,31 @@ namespace Student_Management_System
 
             var app = builder.Build();
 
-            
+            using (var scope = app.Services.CreateScope())
+            {
+                try
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                    db.Database.ExecuteSqlRaw(@"
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'Phone')
+                        BEGIN
+                            ALTER TABLE Users ADD Phone NVARCHAR(50) NULL;
+                        END;
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'Address')
+                        BEGIN
+                            ALTER TABLE Users ADD Address NVARCHAR(255) NULL;
+                        END;
+                        IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'ProfilePicture')
+                        BEGIN
+                            ALTER TABLE Users ADD ProfilePicture NVARCHAR(255) NULL;
+                        END;
+                    ");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"DB Migration Note: {ex.Message}");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -51,6 +75,7 @@ namespace Student_Management_System
 
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 

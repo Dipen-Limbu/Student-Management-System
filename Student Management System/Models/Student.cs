@@ -41,6 +41,9 @@ public partial class Student
     public string? Status { get; set; }
 
     [NotMapped]
+    public string? ProfilePicture { get; set; }
+
+    [NotMapped]
     public string Initials
     {
         get

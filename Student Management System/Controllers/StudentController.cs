@@ -16,11 +16,53 @@ namespace Student_Management_System.Controllers
     public class StudentController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public StudentController(ApplicationDbContext context)
+        public StudentController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
+
+        private async Task<string?> UploadProfilePictureAsync(IFormFile? file)
+        {
+            if (file == null || file.Length == 0) return null;
+
+            try
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".jfif", ".bmp" };
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (string.IsNullOrEmpty(ext) || !allowedExtensions.Contains(ext)) return null;
+
+                var webRoot = _environment.WebRootPath;
+                if (string.IsNullOrEmpty(webRoot))
+                {
+                    webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                }
+
+                var uploadsFolder = Path.Combine(webRoot, "uploads", "profiles");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                return $"/uploads/profiles/{uniqueFileName}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading profile picture: {ex.Message}");
+                return null;
+            }
+        }
+
         public IActionResult Dashboard()
         {
             var model = new StudentDashboardViewModel
@@ -110,18 +152,91 @@ namespace Student_Management_System.Controllers
 
         public IActionResult Profile()
         {
+            var username = User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
             var student = GetCurrentStudent();
             if (student == null)
             {
                 // Fallback if student details aren't fully seeded in the Students table yet
                 student = new Student
                 {
-                    FullName = User.FindFirst("FullName")?.Value ?? "Student",
-                    Email = User.Identity?.Name,
-                    RollNo = "N/A"
+                    FullName = user?.FullName ?? User.FindFirst("FullName")?.Value ?? "Student",
+                    Email = username,
+                    RollNo = "N/A",
+                    Phone = user?.Phone,
+                    Address = user?.Address,
+                    ProfilePicture = user?.ProfilePicture
                 };
             }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(student.Phone)) student.Phone = user?.Phone;
+                if (string.IsNullOrWhiteSpace(student.Address)) student.Address = user?.Address;
+                student.ProfilePicture = user?.ProfilePicture;
+            }
             return View(student);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(string FullName, string Phone, string Address, DateOnly? Dob, IFormFile? ProfileImage)
+        {
+            var username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username)) return RedirectToAction("Login", "Login");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            var student = await _context.Students.FirstOrDefaultAsync(s => s.Email == username);
+
+            var uploadedPic = await UploadProfilePictureAsync(ProfileImage);
+
+            if (student == null)
+            {
+                string rollNo = $"STU-{DateTime.Now.Year}-{(user?.UserId ?? 0):D4}";
+                student = new Student
+                {
+                    FullName = string.IsNullOrWhiteSpace(FullName) ? (user?.FullName ?? "Student") : FullName.Trim(),
+                    Email = username,
+                    RollNo = rollNo,
+                    Phone = Phone?.Trim(),
+                    Address = Address?.Trim(),
+                    Dob = Dob,
+                    EnrolledOn = DateTime.Now
+                };
+                _context.Students.Add(student);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(FullName))
+                {
+                    student.FullName = FullName.Trim();
+                }
+                student.Phone = Phone?.Trim();
+                student.Address = Address?.Trim();
+                student.Dob = Dob;
+                _context.Students.Update(student);
+            }
+
+            if (user != null)
+            {
+                if (!string.IsNullOrWhiteSpace(FullName))
+                {
+                    user.FullName = FullName.Trim();
+                }
+                user.Phone = Phone?.Trim();
+                user.Address = Address?.Trim();
+
+                if (!string.IsNullOrEmpty(uploadedPic))
+                {
+                    user.ProfilePicture = uploadedPic;
+                }
+
+                _context.Users.Update(user);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Profile updated successfully.";
+            return RedirectToAction(nameof(Profile));
         }
 
         [HttpGet]

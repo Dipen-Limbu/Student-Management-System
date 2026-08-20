@@ -1,8 +1,13 @@
+@inject Student_Management_System.Models.ApplicationDbContext DbContext
 @using System.Security.Claims
 @{
-    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Admin User";
-    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Admin";
+    var username = User.Identity?.Name;
+    var dbUser = !string.IsNullOrEmpty(username) ? DbContext.Users.FirstOrDefault(u => u.Username == username) : null;
+    var fullName = dbUser?.FullName ?? User.FindFirst("FullName")?.Value ?? username ?? "Admin User";
+    var role = dbUser?.Role ?? User.FindFirst(ClaimTypes.Role)?.Value ?? "Admin";
+    var profilePic = dbUser?.ProfilePicture;
     var initials = string.Join("", fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpper();
+    if (string.IsNullOrWhiteSpace(initials)) initials = "A";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -128,9 +133,16 @@
             
             <!-- Profile -->
             <a asp-controller="Admin" asp-action="Profile" class="flex items-center gap-3 cursor-pointer hover:opacity-85 transition-opacity">
-                <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm">
-                    @initials
-                </div>
+                @if (!string.IsNullOrEmpty(profilePic))
+                {
+                    <img src="@profilePic" alt="Avatar" class="w-10 h-10 rounded-2xl object-cover border border-blue-100 shadow-sm" />
+                }
+                else
+                {
+                    <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm border border-blue-100 shadow-sm">
+                        @initials
+                    </div>
+                }
                 <div class="flex flex-col hidden sm:flex">
                     <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
                     <span class="text-xs text-textMuted leading-none">@role</span>
