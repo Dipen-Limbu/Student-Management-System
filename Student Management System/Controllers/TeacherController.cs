@@ -14,10 +14,51 @@ namespace Student_Management_System.Controllers
     public class TeacherController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public TeacherController(ApplicationDbContext context)
+        public TeacherController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
+        }
+
+        private async Task<string?> UploadProfilePictureAsync(IFormFile? file)
+        {
+            if (file == null || file.Length == 0) return null;
+
+            try
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".jfif", ".bmp" };
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                if (string.IsNullOrEmpty(ext) || !allowedExtensions.Contains(ext)) return null;
+
+                var webRoot = _environment.WebRootPath;
+                if (string.IsNullOrEmpty(webRoot))
+                {
+                    webRoot = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                }
+
+                var uploadsFolder = Path.Combine(webRoot, "uploads", "profiles");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                var uniqueFileName = $"{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                return $"/uploads/profiles/{uniqueFileName}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error uploading profile picture: {ex.Message}");
+                return null;
+            }
         }
 
         //Static list to simulate a database for the UI presentation
@@ -68,26 +109,104 @@ namespace Student_Management_System.Controllers
         public IActionResult Attendance() { return View(); }
         public IActionResult Profile() 
         { 
+            var username = User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+
             Teacher? teacher = null;
             if (int.TryParse(User.FindFirst("UserId")?.Value, out int userId))
             {
                 teacher = _context.Teachers.FirstOrDefault(t => t.UserId == userId);
+            }
+            if (teacher == null && user != null)
+            {
+                teacher = _context.Teachers.FirstOrDefault(t => t.UserId == user.UserId);
             }
             
             if (teacher == null)
             {
                 teacher = new Teacher 
                 { 
-                    Name = User.FindFirst("FullName")?.Value ?? "Teacher", 
-                    Email = User.Identity?.Name 
+                    Name = user?.FullName ?? User.FindFirst("FullName")?.Value ?? "Teacher", 
+                    Email = username,
+                    Phone = user?.Phone,
+                    Address = user?.Address,
+                    ProfilePicture = user?.ProfilePicture
                 };
             }
             else
             {
-                teacher.Email = User.Identity?.Name;
+                teacher.Email = username;
+                if (string.IsNullOrWhiteSpace(teacher.Phone)) teacher.Phone = user?.Phone;
+                if (string.IsNullOrWhiteSpace(teacher.Address)) teacher.Address = user?.Address;
+                teacher.ProfilePicture = user?.ProfilePicture;
             }
             
             return View(teacher); 
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(string Name, string Phone, string Address, IFormFile? ProfileImage)
+        {
+            var username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username)) return RedirectToAction("Login", "Login");
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            Teacher? teacher = null;
+            if (int.TryParse(User.FindFirst("UserId")?.Value, out int userId))
+            {
+                teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.UserId == userId);
+            }
+            if (teacher == null && user != null)
+            {
+                teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.UserId == user.UserId);
+            }
+
+            var uploadedPic = await UploadProfilePictureAsync(ProfileImage);
+
+            if (teacher == null)
+            {
+                teacher = new Teacher
+                {
+                    Name = string.IsNullOrWhiteSpace(Name) ? (user?.FullName ?? "Teacher") : Name.Trim(),
+                    UserId = user?.UserId ?? 0,
+                    Email = username,
+                    Phone = Phone?.Trim(),
+                    Address = Address?.Trim()
+                };
+                _context.Teachers.Add(teacher);
+            }
+            else
+            {
+                if (!string.IsNullOrWhiteSpace(Name))
+                {
+                    teacher.Name = Name.Trim();
+                }
+                teacher.Phone = Phone?.Trim();
+                teacher.Address = Address?.Trim();
+                _context.Teachers.Update(teacher);
+            }
+
+            if (user != null)
+            {
+                if (!string.IsNullOrWhiteSpace(Name))
+                {
+                    user.FullName = Name.Trim();
+                }
+                user.Phone = Phone?.Trim();
+                user.Address = Address?.Trim();
+
+                if (!string.IsNullOrEmpty(uploadedPic))
+                {
+                    user.ProfilePicture = uploadedPic;
+                }
+
+                _context.Users.Update(user);
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Profile updated successfully.";
+            return RedirectToAction(nameof(Profile));
         }
 
         [HttpGet]

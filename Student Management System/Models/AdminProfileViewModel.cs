@@ -19,6 +19,10 @@ namespace Student_Management_System.Models
         [Phone]
         public string? Phone { get; set; }
 
+        public string? Address { get; set; }
+
+        public string? ProfilePicture { get; set; }
+
         public string Role { get; set; } = "Admin";
         
         public string FullName => $"{FirstName} {LastName}";

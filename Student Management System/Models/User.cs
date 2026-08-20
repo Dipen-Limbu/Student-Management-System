@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Student_Management_System.Models;
@@ -14,4 +14,10 @@ public partial class User
     public string Role { get; set; } = null!;
 
     public string? FullName { get; set; }
+
+    public string? Phone { get; set; }
+
+    public string? Address { get; set; }
+
+    public string? ProfilePicture { get; set; }
 }

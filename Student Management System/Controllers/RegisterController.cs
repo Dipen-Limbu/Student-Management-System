@@ -22,7 +22,7 @@ namespace Student_Management_System.Controllers
 
         [HttpPost]
         public IActionResult Register(User user,
-            string? FirstName, string? LastName, string? Phone)
+            string? FirstName, string? LastName, string? Phone, string? Address)
         {
             try
             {
@@ -48,7 +48,7 @@ namespace Student_Management_System.Controllers
                     return View(user);
                 }
 
-                // --- 1. Save to Users table (with the correct Role and FullName) ---
+                // --- 1. Save to Users table (with Role, FullName, Phone, and Address) ---
                 string fullName = $"{FirstName?.Trim()} {LastName?.Trim()}".Trim();
                 if (string.IsNullOrWhiteSpace(fullName))
                     fullName = user.Username;
@@ -58,7 +58,9 @@ namespace Student_Management_System.Controllers
                     Username     = user.Username,
                     PasswordHash = user.PasswordHash,
                     Role         = string.IsNullOrWhiteSpace(user.Role) ? "Student" : user.Role,
-                    FullName     = fullName
+                    FullName     = fullName,
+                    Phone        = Phone?.Trim(),
+                    Address      = Address?.Trim()
                 };
 
                 _context.Users.Add(newUser);
@@ -76,6 +78,7 @@ namespace Student_Management_System.Controllers
                         RollNo     = rollNo,
                         Email      = user.Username,
                         Phone      = Phone?.Trim(),
+                        Address    = Address?.Trim(),
                         EnrolledOn = DateTime.Now
                     };
 
@@ -92,7 +95,7 @@ namespace Student_Management_System.Controllers
                         UserId  = newUser.UserId,
                         Email   = user.Username,
                         Phone   = Phone?.Trim(),
-                        Address = null,
+                        Address = Address?.Trim(),
                         Department = null
                     };
 

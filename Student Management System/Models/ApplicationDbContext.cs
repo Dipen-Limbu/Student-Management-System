@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -123,6 +123,9 @@ public partial class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.Username, "UQ__Users__536C85E4D76FC159").IsUnique();
 
             entity.Property(e => e.FullName).HasMaxLength(100);
+            entity.Property(e => e.Phone).HasMaxLength(50);
+            entity.Property(e => e.Address).HasMaxLength(255);
+            entity.Property(e => e.ProfilePicture).HasMaxLength(255);
             entity.Property(e => e.PasswordHash).HasMaxLength(256);
             entity.Property(e => e.Role).HasMaxLength(20);
             entity.Property(e => e.Username).HasMaxLength(50);

@@ -1,8 +1,13 @@
+@inject Student_Management_System.Models.ApplicationDbContext DbContext
 @using System.Security.Claims
 @{
-    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Teacher";
-    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Teacher";
+    var username = User.Identity?.Name;
+    var dbUser = !string.IsNullOrEmpty(username) ? DbContext.Users.FirstOrDefault(u => u.Username == username) : null;
+    var fullName = dbUser?.FullName ?? User.FindFirst("FullName")?.Value ?? username ?? "Teacher";
+    var role = dbUser?.Role ?? User.FindFirst(ClaimTypes.Role)?.Value ?? "Teacher";
+    var profilePic = dbUser?.ProfilePicture;
     var initials = string.Join("", fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpper();
+    if (string.IsNullOrWhiteSpace(initials)) initials = "T";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -128,9 +133,16 @@
             
             <!-- Profile -->
             <div class="flex items-center gap-3 border border-gray-200 rounded-full p-1 pr-4 bg-white cursor-pointer hover:shadow-sm transition-shadow">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
-                    @initials
-                </div>
+                @if (!string.IsNullOrEmpty(profilePic))
+                {
+                    <img src="@profilePic" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-blue-200" />
+                }
+                else
+                {
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm">
+                        @initials
+                    </div>
+                }
                 <div class="flex flex-col">
                     <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
                     <span class="text-xs text-textMuted leading-none">@role</span>
@@ -184,9 +196,16 @@
             <div class="px-3 pb-4 flex flex-col gap-3">
                 <!-- User card at bottom of sidebar -->
                 <div class="flex items-center gap-3 px-4 py-2">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-200">
-                        @initials
-                    </div>
+                    @if (!string.IsNullOrEmpty(profilePic))
+                    {
+                        <img src="@profilePic" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-blue-200" />
+                    }
+                    else
+                    {
+                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-200">
+                            @initials
+                        </div>
+                    }
                     <div class="flex flex-col">
                         <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
                         <span class="text-xs text-textMuted leading-none">@role</span>

@@ -20,47 +20,60 @@
         </div>
     }
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Single Form Wrapping Both Columns -->
+    <form asp-action="Profile" method="post" enctype="multipart/form-data" id="admin-profile-form">
         
-        <!-- Left Column: Profile Summary -->
-        <div class="lg:col-span-1">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-8 flex flex-col items-center text-center">
-                
-                <!-- Avatar -->
-                <div class="relative mb-5">
-                    <div class="w-32 h-32 rounded-full bg-[#eef2ff] text-[#2563eb] flex items-center justify-center font-bold text-4xl shadow-inner">
-                        @Model.Initials
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            <!-- Left Column: Profile Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-8 flex flex-col items-center text-center">
+                    
+                    <!-- Avatar with Camera Badge -->
+                    <div class="relative mb-5 group">
+                        <div id="avatar-container" class="w-32 h-32 rounded-full flex items-center justify-center overflow-hidden border border-blue-100 shadow-inner bg-[#eef2ff]">
+                            @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                            {
+                                <img id="avatar-preview" src="@Model.ProfilePicture" alt="Profile Picture" class="w-full h-full object-cover" />
+                            }
+                            else
+                            {
+                                <div id="avatar-initials" class="w-full h-full text-[#2563eb] flex items-center justify-center font-bold text-4xl">
+                                    @Model.Initials
+                                </div>
+                                <img id="avatar-preview" src="" alt="Profile Picture" class="w-full h-full object-cover hidden" />
+                            }
+                        </div>
+                        <!-- Camera Badge Button -->
+                        <label for="ProfileImage" class="absolute bottom-1 right-1 w-9 h-9 bg-[#2563eb] hover:bg-blue-700 transition-colors rounded-full border-4 border-white flex items-center justify-center text-white shadow-sm cursor-pointer" title="Upload profile picture">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </label>
+                        <input type="file" id="ProfileImage" name="ProfileImage" accept="image/*" class="hidden" onchange="previewAndSubmitImage(this)" />
                     </div>
-                    <!-- Camera Badge -->
-                    <button type="button" class="absolute bottom-1 right-1 w-9 h-9 bg-[#2563eb] hover:bg-blue-700 transition-colors rounded-full border-4 border-white flex items-center justify-center text-white shadow-sm" title="Change picture">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    </button>
+
+                    <!-- Info -->
+                    <h3 class="text-xl font-bold text-gray-900 leading-tight">@Model.FullName</h3>
+                    <p class="text-sm text-gray-500 mt-1">@Model.Email</p>
+                    <div class="mt-3">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#eef2ff] text-[#2563eb]">
+                            @Model.Role
+                        </span>
+                    </div>
+
+                    <!-- Action -->
+                    <a asp-action="ChangePassword" class="mt-8 w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        Change password
+                    </a>
+
                 </div>
-
-                <!-- Info -->
-                <h3 class="text-xl font-bold text-gray-900 leading-tight">@Model.FullName</h3>
-                <p class="text-sm text-gray-500 mt-1">@Model.Email</p>
-                <div class="mt-3">
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#eef2ff] text-[#2563eb]">
-                        @Model.Role
-                    </span>
-                </div>
-
-                <!-- Action -->
-                <a asp-action="ChangePassword" class="mt-8 w-full px-4 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200 transition-colors flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
-                    Change password
-                </a>
-
             </div>
-        </div>
 
-        <!-- Right Column: Edit Profile Form -->
-        <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 md:p-8 h-full">
-                <h3 class="text-lg font-bold text-gray-900 mb-6">Edit profile</h3>
-                
-                <form asp-action="Profile" method="post">
+            <!-- Right Column: Edit Profile Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] p-6 md:p-8 h-full">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Edit profile</h3>
+                    
                     <div asp-validation-summary="ModelOnly" class="text-red-500 text-sm mb-4"></div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -89,6 +102,12 @@
                             <span asp-validation-for="Phone" class="text-xs text-red-500"></span>
                         </div>
 
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label asp-for="Address" class="block text-sm font-semibold text-gray-700">Address</label>
+                            <input asp-for="Address" class="block w-full px-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 sm:text-sm transition-all" />
+                            <span asp-validation-for="Address" class="text-xs text-red-500"></span>
+                        </div>
+
                     </div>
 
                     <div class="mt-8 flex justify-end">
@@ -97,14 +116,37 @@
                             Save changes
                         </button>
                     </div>
-                </form>
 
+                </div>
             </div>
+
         </div>
 
-    </div>
+    </form>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function previewAndSubmitImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var preview = document.getElementById('avatar-preview');
+                    var initials = document.getElementById('avatar-initials');
+                    if (preview) {
+                        preview.src = e.target.result;
+                        preview.classList.remove('hidden');
+                    }
+                    if (initials) {
+                        initials.classList.add('hidden');
+                    }
+                    if (input.form) {
+                        input.form.submit();
+                    }
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 }

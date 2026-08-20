@@ -1,8 +1,13 @@
+@inject Student_Management_System.Models.ApplicationDbContext DbContext
 @using System.Security.Claims
 @{
-    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Student";
-    var role = User.FindFirst(ClaimTypes.Role)?.Value ?? "Student";
+    var username = User.Identity?.Name;
+    var dbUser = !string.IsNullOrEmpty(username) ? DbContext.Users.FirstOrDefault(u => u.Username == username) : null;
+    var fullName = dbUser?.FullName ?? User.FindFirst("FullName")?.Value ?? username ?? "Student";
+    var role = dbUser?.Role ?? User.FindFirst(ClaimTypes.Role)?.Value ?? "Student";
+    var profilePic = dbUser?.ProfilePicture;
     var initials = string.Join("", fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpper();
+    if (string.IsNullOrWhiteSpace(initials)) initials = "S";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -72,9 +77,16 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
             </button>
             <div class="flex items-center gap-3 border border-gray-200 rounded-full p-1 pr-4 bg-white cursor-pointer hover:shadow-sm transition-shadow">
-                <div class="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-sm">
-                    @initials
-                </div>
+                @if (!string.IsNullOrEmpty(profilePic))
+                {
+                    <img src="@profilePic" alt="Avatar" class="w-8 h-8 rounded-full object-cover border border-blue-200" />
+                }
+                else
+                {
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-primary flex items-center justify-center font-bold text-sm">
+                        @initials
+                    </div>
+                }
                 <div class="flex flex-col">
                     <span class="text-sm font-semibold leading-none mb-1">@fullName</span>
                     <span class="text-xs text-textMuted leading-none">@role</span>

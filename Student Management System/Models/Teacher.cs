@@ -42,6 +42,9 @@ public partial class Teacher
     public string? Courses { get; set; }
 
     [NotMapped]
+    public string? ProfilePicture { get; set; }
+
+    [NotMapped]
     public string Initials
     {
         get
