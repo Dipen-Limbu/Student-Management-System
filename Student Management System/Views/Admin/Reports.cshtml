@@ -33,7 +33,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-semibold text-gray-500">Total Students</p>
-                    <h3 class="text-3xl font-bold text-gray-900 mt-1">42</h3>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">@ViewBag.TotalStudents</h3>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-semibold text-gray-500">Total Teachers</p>
-                    <h3 class="text-3xl font-bold text-gray-900 mt-1">5</h3>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">@ViewBag.TotalTeachers</h3>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-teal-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-semibold text-gray-500">Active Courses</p>
-                    <h3 class="text-3xl font-bold text-gray-900 mt-1">6</h3>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">@ViewBag.TotalCourses</h3>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center text-green-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@
                 </div>
             </div>
             <div class="mt-2">
-                <!-- course has no positive growth pill in the layout, so leave it empty or matches perfectly -->
+                <!-- course has no growth pill in the layout -->
             </div>
         </div>
 
@@ -87,7 +87,7 @@
             <div class="flex items-start justify-between">
                 <div>
                     <p class="text-sm font-semibold text-gray-500">Avg Attendance</p>
-                    <h3 class="text-3xl font-bold text-gray-900 mt-1">91%</h3>
+                    <h3 class="text-3xl font-bold text-gray-900 mt-1">@ViewBag.AvgAttendance%</h3>
                 </div>
                 <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

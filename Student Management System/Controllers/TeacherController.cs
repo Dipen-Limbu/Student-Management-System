@@ -61,27 +61,61 @@ namespace Student_Management_System.Controllers
             }
         }
 
-        //Static list to simulate a database for the UI presentation
-        // Replace with ApplicationDbContext _context when the Teacher table is created in the database.
-        private static List<Teacher> _teachers = new List<Teacher>
+        // Helper to get the Teacher record for the currently logged-in user
+        private Teacher? GetCurrentTeacher()
         {
-            new Teacher { TeacherId = 1, Name = "Emily Carter", Email = "emily.carter@school.edu", Phone = "+1 555 200 1201", Department = "Computer Science", Status = "active", Courses = "CS101, DS301" },
-            new Teacher { TeacherId = 2, Name = "Michael Nguyen", Email = "michael.nguyen@school.edu", Phone = "+1 555 200 1202", Department = "Mathematics", Status = "active", Courses = "MA201" },
-            new Teacher { TeacherId = 3, Name = "Priya Sharma", Email = "priya.sharma@school.edu", Phone = "+1 555 200 1203", Department = "Physics", Status = "active", Courses = "PH110" },
-            new Teacher { TeacherId = 4, Name = "David Kim", Email = "david.kim@school.edu", Phone = "+1 555 200 1204", Department = "English", Status = "active", Courses = "EN105" },
-            new Teacher { TeacherId = 5, Name = "Sofia Rossi", Email = "sofia.rossi@school.edu", Phone = "+1 555 200 1205", Department = "Business", Status = "inactive", Courses = "BUS220" }
-        };
+            if (int.TryParse(User.FindFirst("UserId")?.Value, out int userId))
+            {
+                var t = _context.Teachers.FirstOrDefault(t => t.UserId == userId);
+                if (t != null) return t;
+            }
+            var username = User.Identity?.Name;
+            var user = _context.Users.FirstOrDefault(u => u.Username == username);
+            return user != null ? _context.Teachers.FirstOrDefault(t => t.UserId == user.UserId) : null;
+        }
+
         // --- Teacher Role Dashboard Actions ---
         public IActionResult Dashboard()
         {
+            var teacher = GetCurrentTeacher();
+
+            // Load courses from DB (all courses as proxy for classes assigned)
+            var courses = _context.Courses
+                .Include(c => c.Enrollments)
+                .ToList();
+
+            int totalStudents = _context.Enrollments.Select(e => e.StudentId).Distinct().Count();
+            int todayPresent  = _context.Attendances
+                .Where(a => a.Date == DateOnly.FromDateTime(DateTime.Today) && a.Status == "Present")
+                .Count();
+
             var model = new TeacherDashboardViewModel
             {
-                MyClasses = new List<TeacherClassItem>
+                TeacherName      = teacher?.Name ?? User.FindFirst("FullName")?.Value ?? "Teacher",
+                Role             = "Teacher",
+                AssignedClasses  = courses.Count > 0 ? courses.Count : 2,
+                TotalStudents    = totalStudents > 0 ? totalStudents : 60,
+                TodaysAttendance = todayPresent > 0 ? $"{todayPresent} present" : "86 present",
+                PendingTasks     = 3,
+                MyClasses        = courses.Take(5).Select((c, i) => new TeacherClassItem
+                {
+                    ClassName        = c.CourseName,
+                    Room             = $"Room {200 + i + 1}",
+                    Semester         = c.Duration ?? "Semester 1",
+                    EnrolledStudents = c.Enrollments.Count,
+                    Capacity         = 40
+                }).ToList()
+            };
+
+            if (!model.MyClasses.Any())
+            {
+                model.MyClasses = new List<TeacherClassItem>
                 {
                     new TeacherClassItem { ClassName = "CS101 - A", Room = "Room 204", Semester = "Semester 1", EnrolledStudents = 36, Capacity = 40 },
                     new TeacherClassItem { ClassName = "DS301 - A", Room = "Room 210", Semester = "Semester 5", EnrolledStudents = 24, Capacity = 30 }
-                }
-            };
+                };
+            }
+
             return View(model);
         }
 
@@ -105,8 +139,98 @@ namespace Student_Management_System.Controllers
 
             return View(classes);
         }
-        public IActionResult MyStudents() { return View(); }
-        public IActionResult Attendance() { return View(); }
+        public IActionResult MyStudents()
+        {
+            // Load all students enrolled in any course (all students visible to teacher)
+            var enrollments = _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .ToList();
+
+            // Group students with their course and attendance stats
+            var studentCourseMap = enrollments
+                .Where(e => e.Student != null)
+                .GroupBy(e => e.StudentId)
+                .Select(g =>
+                {
+                    var s = g.First().Student!;
+                    var course = g.First().Course;
+
+                    int total   = _context.Attendances.Count(a => a.StudentId == s.StudentId);
+                    int present = _context.Attendances.Count(a => a.StudentId == s.StudentId && a.Status == "Present");
+                    int pct     = total > 0 ? (int)((float)present / total * 100) : 0;
+
+                    s.Course = course?.CourseName ?? "—";
+                    ViewData[$"att_{s.StudentId}"] = pct;
+                    return s;
+                }).ToList();
+
+            ViewBag.AllStudents = studentCourseMap;
+            return View(studentCourseMap);
+        }
+
+        public IActionResult Attendance(int? courseId, string? date)
+        {
+            // Load all courses for the dropdown
+            var courses = _context.Courses.OrderBy(c => c.CourseName).ToList();
+            ViewBag.Courses = courses;
+
+            int selectedCourseId = courseId ?? (courses.FirstOrDefault()?.CourseId ?? 0);
+            var selectedDate = string.IsNullOrEmpty(date)
+                ? DateOnly.FromDateTime(DateTime.Today)
+                : DateOnly.Parse(date);
+
+            ViewBag.SelectedCourseId = selectedCourseId;
+            ViewBag.SelectedDate     = selectedDate.ToString("yyyy-MM-dd");
+
+            // Students enrolled in the selected course
+            var enrolledStudents = _context.Enrollments
+                .Where(e => e.CourseId == selectedCourseId)
+                .Include(e => e.Student)
+                .Select(e => e.Student!)
+                .ToList();
+
+            // Existing attendance for those students on that date
+            var existingAttendance = _context.Attendances
+                .Where(a => a.Date == selectedDate && enrolledStudents.Select(s => s.StudentId).Contains(a.StudentId ?? 0))
+                .ToList();
+
+            ViewBag.ExistingAttendance = existingAttendance;
+            return View(enrolledStudents);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Attendance(int courseId, string date, Dictionary<int, string> statuses)
+        {
+            if (!DateOnly.TryParse(date, out var attendanceDate))
+                attendanceDate = DateOnly.FromDateTime(DateTime.Today);
+
+            foreach (var (studentId, status) in statuses)
+            {
+                var existing = _context.Attendances
+                    .FirstOrDefault(a => a.StudentId == studentId && a.Date == attendanceDate);
+
+                if (existing != null)
+                {
+                    existing.Status = status;
+                    _context.Attendances.Update(existing);
+                }
+                else
+                {
+                    _context.Attendances.Add(new Attendance
+                    {
+                        StudentId = studentId,
+                        Date      = attendanceDate,
+                        Status    = status
+                    });
+                }
+            }
+
+            _context.SaveChanges();
+            TempData["SuccessMessage"] = "Attendance saved successfully!";
+            return RedirectToAction(nameof(Attendance), new { courseId, date });
+        }
         public IActionResult Profile() 
         { 
             var username = User.Identity?.Name;
@@ -258,16 +382,46 @@ namespace Student_Management_System.Controllers
 
         public IActionResult Index(string searchString)
         {
-            var teachersQuery = _teachers.AsEnumerable();
+            // Load teachers from DB, join with Users for email info
+            var teachers = _context.Teachers
+                .Join(_context.Users,
+                      t => t.UserId,
+                      u => u.UserId,
+                      (t, u) => new Teacher
+                      {
+                          TeacherId = t.TeacherId,
+                          Name      = t.Name,
+                          UserId    = t.UserId,
+                          Phone     = t.Phone ?? u.Phone,
+                          Address   = t.Address ?? u.Address,
+                          Email     = u.Username,
+                          Status    = "active"
+                      })
+                .ToList();
+
+            if (!teachers.Any())
+            {
+                // Fallback: show users with role Teacher
+                teachers = _context.Users
+                    .Where(u => u.Role == "Teacher")
+                    .Select(u => new Teacher
+                    {
+                        TeacherId = 0,
+                        Name      = u.FullName ?? u.Username,
+                        Email     = u.Username,
+                        Phone     = u.Phone,
+                        Status    = "active"
+                    }).ToList();
+            }
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                teachersQuery = teachersQuery.Where(t => t.FullName.Contains(searchString, System.StringComparison.OrdinalIgnoreCase) || 
-                                                         (t.Email != null && t.Email.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)) ||
-                                                         (t.Department != null && t.Department.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)));
+                teachers = teachers.Where(t =>
+                    (t.Name != null && t.Name.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)) ||
+                    (t.Email != null && t.Email.Contains(searchString, System.StringComparison.OrdinalIgnoreCase))).ToList();
             }
 
-            return View(teachersQuery.ToList());
+            return View(teachers);
         }
 
         public IActionResult Create()
@@ -281,18 +435,18 @@ namespace Student_Management_System.Controllers
         {
             if (ModelState.IsValid)
             {
-                teacher.TeacherId = _teachers.Any() ? _teachers.Max(t => t.TeacherId) + 1 : 1;
-                _teachers.Add(teacher);
+                _context.Teachers.Add(teacher);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
             return View(teacher);
         }
 
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher == null) return NotFound();
 
             return View(teacher);
@@ -300,42 +454,38 @@ namespace Student_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Teacher teacher)
+        public async Task<IActionResult> Edit(int id, Teacher teacher)
         {
             if (id != teacher.TeacherId) return NotFound();
 
             if (ModelState.IsValid)
             {
-                var existingTeacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
-                if (existingTeacher != null)
-                {
-                    existingTeacher.Name = teacher.FullName;
-                    existingTeacher.Email = teacher.Email;
-                    existingTeacher.Phone = teacher.Phone;
-                    existingTeacher.Department = teacher.Department;
-                    existingTeacher.Status = teacher.Status;
-                    existingTeacher.Courses = teacher.Courses;
-                }
+                _context.Teachers.Update(teacher);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(teacher);
         }
 
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher == null) return NotFound();
+
+            // Attach email from Users table
+            var user = _context.Users.FirstOrDefault(u => u.UserId == teacher.UserId);
+            if (user != null) teacher.Email = user.Username;
 
             return View(teacher);
         }
 
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher == null) return NotFound();
 
             return View(teacher);
@@ -343,14 +493,16 @@ namespace Student_Management_System.Controllers
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var teacher = _teachers.FirstOrDefault(t => t.TeacherId == id);
+            var teacher = await _context.Teachers.FindAsync(id);
             if (teacher != null)
             {
-                _teachers.Remove(teacher);
+                _context.Teachers.Remove(teacher);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }
+
     }
 }

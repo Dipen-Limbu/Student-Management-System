@@ -65,28 +65,61 @@ namespace Student_Management_System.Controllers
 
         public IActionResult Dashboard()
         {
+            var student = GetCurrentStudent();
+
+            // Build attendance stats from DB
+            List<Attendance> attendances = new();
+            if (student != null)
+            {
+                attendances = _context.Attendances
+                    .Where(a => a.StudentId == student.StudentId)
+                    .OrderByDescending(a => a.Date)
+                    .Take(7)
+                    .ToList();
+            }
+
+            int total   = attendances.Count;
+            int present = attendances.Count(a => a.Status == "Present");
+            int pct     = total > 0 ? (int)((float)present / total * 100) : 0;
+
+            // Get first enrolled course info
+            var enrollment = student != null
+                ? _context.Enrollments
+                    .Where(e => e.StudentId == student.StudentId)
+                    .Include(e => e.Course)
+                    .OrderByDescending(e => e.EnrolledOn)
+                    .FirstOrDefault()
+                : null;
+
             var model = new StudentDashboardViewModel
             {
-                StudentName = "Sara Student",
-                CourseName = "Introduction to Computer Science",
-                CourseCode = "CS101",
-                Semester = "1",
-                Section = "Section A",
-                AttendancePercentage = 57,
-                AttendedClasses = 4,
-                TotalClasses = 7,
-                ClassTeacher = "Emily Carter",
-                TeacherDepartment = "Computer Science",
-                RecentAttendances = new List<AttendanceRecord>
-                {
-                    new AttendanceRecord { Date = "2026-07-04", ClassName = "CS101 - A", Status = "Present" },
-                    new AttendanceRecord { Date = "2026-07-03", ClassName = "CS101 - A", Status = "Present" },
-                    new AttendanceRecord { Date = "2026-07-02", ClassName = "CS101 - A", Status = "Present" },
-                    new AttendanceRecord { Date = "2026-07-01", ClassName = "CS101 - A", Status = "Present" },
-                    new AttendanceRecord { Date = "2026-06-30", ClassName = "CS101 - A", Status = "Absent" },
-                    new AttendanceRecord { Date = "2026-06-29", ClassName = "CS101 - A", Status = "Leave" },
-                    new AttendanceRecord { Date = "2026-06-28", ClassName = "CS101 - A", Status = "Late" }
-                }
+                StudentName          = student?.FullName ?? User.FindFirst("FullName")?.Value ?? "Student",
+                CourseName           = enrollment?.Course?.CourseName ?? "Introduction to Computer Science",
+                CourseCode           = enrollment?.Course?.CourseName?.Split(' ').FirstOrDefault() ?? "CS101",
+                Semester             = enrollment?.Course?.Duration ?? "Semester 1",
+                Section              = "Section A",
+                AttendancePercentage = pct > 0 ? pct : 57,
+                AttendedClasses      = present > 0 ? present : 4,
+                TotalClasses         = total > 0 ? total : 7,
+                ClassTeacher         = "Emily Carter",
+                TeacherDepartment    = "Computer Science",
+                RecentAttendances    = attendances.Any()
+                    ? attendances.Select(a => new AttendanceRecord
+                      {
+                          Date      = a.Date.ToString("yyyy-MM-dd"),
+                          ClassName = enrollment?.Course?.CourseName ?? "Class",
+                          Status    = a.Status
+                      }).ToList()
+                    : new List<AttendanceRecord>
+                      {
+                          new AttendanceRecord { Date = "2026-07-04", ClassName = "CS101 - A", Status = "Present" },
+                          new AttendanceRecord { Date = "2026-07-03", ClassName = "CS101 - A", Status = "Present" },
+                          new AttendanceRecord { Date = "2026-07-02", ClassName = "CS101 - A", Status = "Present" },
+                          new AttendanceRecord { Date = "2026-07-01", ClassName = "CS101 - A", Status = "Present" },
+                          new AttendanceRecord { Date = "2026-06-30", ClassName = "CS101 - A", Status = "Absent"  },
+                          new AttendanceRecord { Date = "2026-06-29", ClassName = "CS101 - A", Status = "Leave"   },
+                          new AttendanceRecord { Date = "2026-06-28", ClassName = "CS101 - A", Status = "Late"    }
+                      }
             };
 
             return View(model);
@@ -288,45 +321,35 @@ namespace Student_Management_System.Controllers
 
         public IActionResult Index(string searchString, string status, string course)
         {
-            var students = new List<Student>
-            {
-                new Student { StudentId = 1, FullName = "Liam Smith", Email = "liam.smith1@school.edu", RollNo = "2024-1000", Course = "CS101", Semester = "1", Status = "inactive" },
-                new Student { StudentId = 2, FullName = "Olivia Brown", Email = "olivia.brown2@school.edu", RollNo = "2024-1001", Course = "MA201", Semester = "2", Status = "active" },
-                new Student { StudentId = 3, FullName = "Noah Miller", Email = "noah.miller3@school.edu", RollNo = "2024-1002", Course = "PH110", Semester = "3", Status = "active" },
-                new Student { StudentId = 4, FullName = "Emma Martinez", Email = "emma.martinez4@school.edu", RollNo = "2024-1003", Course = "EN105", Semester = "4", Status = "active" },
-                new Student { StudentId = 5, FullName = "Oliver Wilson", Email = "oliver.wilson5@school.edu", RollNo = "2024-1004", Course = "BUS220", Semester = "5", Status = "active" },
-                new Student { StudentId = 6, FullName = "Ava Taylor", Email = "ava.taylor6@school.edu", RollNo = "2024-1005", Course = "DS301", Semester = "6", Status = "active" },
-                new Student { StudentId = 7, FullName = "Elijah Martin", Email = "elijah.martin7@school.edu", RollNo = "2024-1006", Course = "CS101", Semester = "7", Status = "active" },
-                new Student { StudentId = 8, FullName = "Charlotte Thompson", Email = "charlotte.thompson8@school.edu", RollNo = "2024-1007", Course = "MA201", Semester = "1", Status = "active" },
-                new Student { StudentId = 9, FullName = "William Sanchez", Email = "william.sanchez9@school.edu", RollNo = "2024-1008", Course = "PH110", Semester = "2", Status = "active" },
-                new Student { StudentId = 10, FullName = "Sophia Lewis", Email = "sophia.lewis10@school.edu", RollNo = "2024-1009", Course = "EN105", Semester = "3", Status = "active" },
-                new Student { StudentId = 11, FullName = "James Smith", Email = "james.smith11@school.edu", RollNo = "2024-1010", Course = "BUS220", Semester = "4", Status = "active" },
-                new Student { StudentId = 12, FullName = "Amelia Brown", Email = "amelia.brown12@school.edu", RollNo = "2024-1011", Course = "DS301", Semester = "5", Status = "inactive" },
-                new Student { StudentId = 13, FullName = "Benjamin Miller", Email = "benjamin.miller13@school.edu", RollNo = "2024-1012", Course = "CS101", Semester = "6", Status = "active" },
-                new Student { StudentId = 14, FullName = "Isabella Martinez", Email = "isabella.martinez14@school.edu", RollNo = "2024-1013", Course = "MA201", Semester = "7", Status = "active" },
-                new Student { StudentId = 15, FullName = "Lucas Wilson", Email = "lucas.wilson15@school.edu", RollNo = "2024-1014", Course = "PH110", Semester = "1", Status = "active" },
-                new Student { StudentId = 16, FullName = "Mia Taylor", Email = "mia.taylor16@school.edu", RollNo = "2024-1015", Course = "EN105", Semester = "2", Status = "active" },
-                new Student { StudentId = 17, FullName = "Henry Martin", Email = "henry.martin17@school.edu", RollNo = "2024-1016", Course = "BUS220", Semester = "3", Status = "active" },
-                new Student { StudentId = 18, FullName = "Evelyn Thompson", Email = "evelyn.thompson18@school.edu", RollNo = "2024-1017", Course = "DS301", Semester = "4", Status = "active" },
-                new Student { StudentId = 19, FullName = "Alexander Sanchez", Email = "alexander.sanchez19@school.edu", RollNo = "2024-1018", Course = "CS101", Semester = "5", Status = "active" },
-                new Student { StudentId = 20, FullName = "Harper Lewis", Email = "harper.lewis20@school.edu", RollNo = "2024-1019", Course = "MA201", Semester = "6", Status = "active" }
-            };
+            // Load real students from DB
+            var query = _context.Students.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                students = students.Where(s => s.FullName.Contains(searchString, StringComparison.OrdinalIgnoreCase) || 
-                                               s.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) || 
-                                               s.RollNo.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+                query = query.Where(s =>
+                    s.FullName.Contains(searchString) ||
+                    (s.Email != null && s.Email.Contains(searchString)) ||
+                    s.RollNo.Contains(searchString));
             }
 
-            if (!string.IsNullOrEmpty(status))
+            var students = query
+                .OrderByDescending(s => s.EnrolledOn)
+                .ToList();
+
+            // Attach course name from first enrollment (not stored directly on Student)
+            var enrollmentsWithCourse = _context.Enrollments
+                .Include(e => e.Course)
+                .ToList();
+
+            foreach (var s in students)
             {
-                students = students.Where(s => s.Status.Equals(status, StringComparison.OrdinalIgnoreCase)).ToList();
+                var enroll = enrollmentsWithCourse.FirstOrDefault(e => e.StudentId == s.StudentId);
+                s.Course = enroll?.Course?.CourseName ?? "—";
             }
 
-            if (!string.IsNullOrEmpty(course))
+            if (!string.IsNullOrEmpty(searchString))
             {
-                students = students.Where(s => s.Course.Equals(course, StringComparison.OrdinalIgnoreCase)).ToList();
+                ViewBag.SearchString = searchString;
             }
 
             return View(students);
