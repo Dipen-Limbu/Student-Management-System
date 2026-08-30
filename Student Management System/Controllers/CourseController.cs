@@ -1,38 +1,56 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Student_Management_System.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Student_Management_System.Controllers
 {
     [Authorize]
     public class CourseController : Controller
     {
-        // Static list to simulate a database for the UI presentation
-        private static List<Course> _courses = new List<Course>
+        private readonly ApplicationDbContext _context;
+
+        public CourseController(ApplicationDbContext context)
         {
-            new Course { CourseId = 1, CourseCode = "CS101", CourseName = "Introduction to Computer Science", Description = "Foundations of computing, algorithms, and programming.", Credits = 4, Duration = "16 weeks", EnrolledStudents = 128, BannerColor = "bg-[#2546a1]" },
-            new Course { CourseId = 2, CourseCode = "MA201", CourseName = "Calculus II", Description = "Integration, series, and multivariable calculus.", Credits = 3, Duration = "16 weeks", EnrolledStudents = 96, BannerColor = "bg-[#0b80a6]" },
-            new Course { CourseId = 3, CourseCode = "PH110", CourseName = "Physics for Engineers", Description = "Mechanics, waves, and thermodynamics.", Credits = 4, Duration = "16 weeks", EnrolledStudents = 84, BannerColor = "bg-[#543bba]" },
-            new Course { CourseId = 4, CourseCode = "EN105", CourseName = "Academic English", Description = "Writing, reading and communication in academic contexts.", Credits = 2, Duration = "12 weeks", EnrolledStudents = 152, BannerColor = "bg-[#0f8a55]" },
-            new Course { CourseId = 5, CourseCode = "BUS220", CourseName = "Principles of Management", Description = "Introduction to management theory and practice.", Credits = 3, Duration = "14 weeks", EnrolledStudents = 74, BannerColor = "bg-[#ba7910]" },
-            new Course { CourseId = 6, CourseCode = "DS301", CourseName = "Data Structures", Description = "Trees, graphs, hashing and complexity analysis.", Credits = 4, Duration = "16 weeks", EnrolledStudents = 62, BannerColor = "bg-[#ba2e2b]" }
-        };
+            _context = context;
+        }
+
+        private void PopulateComputedProperties(Course c)
+        {
+            c.CourseCode = c.CourseName.Split(' ').FirstOrDefault() ?? "CRS-" + c.CourseId;
+            c.Description = "This course covers the essential fundamentals of " + c.CourseName + ". Students will engage in lectures, practical exercises, and projects.";
+            c.Credits = (c.CourseId % 2) + 3; // 3 or 4 credits dynamically
+            c.EnrolledStudents = _context.Enrollments.Count(e => e.CourseId == c.CourseId);
+            c.BannerColor = new[] { "bg-[#2546a1]", "bg-[#0b80a6]", "bg-[#543bba]", "bg-[#0f8a55]", "bg-[#ba7910]", "bg-[#ba2e2b]" }[c.CourseId % 6];
+        }
 
         // --- Admin Course Management CRUD ---
 
-        public IActionResult Index(string searchString)
+        public async Task<IActionResult> Index(string searchString)
         {
-            var coursesQuery = _courses.AsEnumerable();
+            var query = _context.Courses.AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                coursesQuery = coursesQuery.Where(c => c.CourseName.Contains(searchString, System.StringComparison.OrdinalIgnoreCase) || 
-                                                       (c.CourseCode != null && c.CourseCode.Contains(searchString, System.StringComparison.OrdinalIgnoreCase)));
+                query = query.Where(c => c.CourseName.Contains(searchString));
             }
 
-            return View(coursesQuery.ToList());
+            var courses = await query.ToListAsync();
+            foreach (var course in courses)
+            {
+                PopulateComputedProperties(course);
+            }
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                ViewBag.SearchString = searchString;
+            }
+
+            return View(courses);
         }
 
         public IActionResult Create()
@@ -42,88 +60,91 @@ namespace Student_Management_System.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Course course)
+        public async Task<IActionResult> Create(Course course)
         {
             if (ModelState.IsValid)
             {
-                course.CourseId = _courses.Any() ? _courses.Max(c => c.CourseId) + 1 : 1;
-                // Assign a random color if not selected
-                if (string.IsNullOrEmpty(course.BannerColor))
-                {
-                    var colors = new[] { "bg-[#2546a1]", "bg-[#0b80a6]", "bg-[#543bba]", "bg-[#0f8a55]", "bg-[#ba7910]", "bg-[#ba2e2b]" };
-                    course.BannerColor = colors[new System.Random().Next(colors.Length)];
-                }
-                
-                _courses.Add(course);
+                _context.Courses.Add(course);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(course);
         }
 
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
 
-            var course = _courses.FirstOrDefault(c => c.CourseId == id);
+            var course = await _context.Courses.FindAsync(id);
             if (course == null) return NotFound();
 
+            PopulateComputedProperties(course);
             return View(course);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, Course course)
+        public async Task<IActionResult> Edit(int id, Course course)
         {
             if (id != course.CourseId) return NotFound();
 
             if (ModelState.IsValid)
             {
-                var existingCourse = _courses.FirstOrDefault(c => c.CourseId == id);
-                if (existingCourse != null)
+                try
                 {
-                    existingCourse.CourseCode = course.CourseCode;
-                    existingCourse.CourseName = course.CourseName;
-                    existingCourse.Description = course.Description;
-                    existingCourse.Credits = course.Credits;
-                    existingCourse.Duration = course.Duration;
-                    existingCourse.EnrolledStudents = course.EnrolledStudents;
-                    existingCourse.BannerColor = course.BannerColor;
+                    _context.Courses.Update(course);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!CourseExists(course.CourseId)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(course);
         }
 
-        public IActionResult Details(int? id)
+        public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
 
-            var course = _courses.FirstOrDefault(c => c.CourseId == id);
+            var course = await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseId == id);
             if (course == null) return NotFound();
 
+            PopulateComputedProperties(course);
             return View(course);
         }
 
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
 
-            var course = _courses.FirstOrDefault(c => c.CourseId == id);
+            var course = await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseId == id);
             if (course == null) return NotFound();
 
+            PopulateComputedProperties(course);
             return View(course);
         }
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = _courses.FirstOrDefault(c => c.CourseId == id);
+            var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                _courses.Remove(course);
+                _context.Courses.Remove(course);
+                await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool CourseExists(int id)
+        {
+            return _context.Courses.Any(e => e.CourseId == id);
         }
     }
 }

@@ -1,3 +1,4 @@
+@model IEnumerable<Student_Management_System.Models.User>
 @{
     ViewData["Title"] = "Users";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -8,7 +9,7 @@
     <!-- Page Header -->
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-1">Users</h2>
-        <p class="text-sm text-gray-500">26 accounts across roles</p>
+        <p class="text-sm text-gray-500">@Model.Count() account@(Model.Count() == 1 ? "" : "s") across all roles</p>
     </div>
 
     <!-- Users Table -->
@@ -24,8 +25,69 @@
         </div>
 
         <!-- Table Body -->
-        <div id="usersTableBody"></div>
-    </div>
+        <div id="usersTableBody">
+            @{
+                var roleColors = new Dictionary<string, string>
+                {
+                    ["Teacher"] = "bg-teal-50 text-teal-600 border border-teal-200",
+                    ["Student"] = "bg-green-50 text-green-600 border border-green-200",
+                    ["Admin"]   = "bg-blue-50 text-blue-600 border border-blue-200"
+                };
+                int rowIdx = 0;
+            }
+            @foreach (var u in Model)
+            {
+                var initials = string.Join("", (u.FullName ?? u.Username).Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => s[0]).Take(2)).ToUpper();
+                if (string.IsNullOrEmpty(initials)) initials = u.Username.Substring(0, Math.Min(2, u.Username.Length)).ToUpper();
+                var displayName = u.FullName ?? u.Username;
+                var roleClass = roleColors.GetValueOrDefault(u.Role, "bg-gray-50 text-gray-600 border border-gray-200");
+                var isLast = rowIdx == Model.Count() - 1;
+
+                <div class="user-row grid gap-4 items-center px-6 py-3.5 hover:bg-gray-50/60 transition-colors @(isLast ? "" : "border-b border-gray-100")"
+                     style="grid-template-columns: 1.6fr 2fr 140px 120px;"
+                     data-id="@u.UserId"
+                     data-name="@displayName"
+                     data-email="@u.Username"
+                     data-role="@u.Role"
+                     data-status="active">
+
+                    <!-- Name + Initials -->
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs border border-blue-100 shrink-0">
+                            @initials
+                        </div>
+                        <span class="text-sm font-semibold text-gray-800 truncate">@displayName</span>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="text-sm text-gray-500 truncate">@u.Username</div>
+
+                    <!-- Role Badge -->
+                    <div>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold @roleClass">@u.Role</span>
+                    </div>
+
+                    <!-- Status + Actions -->
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">active</span>
+                        <button onclick="openEdit(this.closest('.user-row'))" class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all" title="Edit">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        </button>
+                        <button onclick="openDelete(this.closest('.user-row'))" class="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </button>
+                    </div>
+                </div>
+                rowIdx++;
+            }
+
+            @if (!Model.Any())
+            {
+                <div class="flex flex-col items-center justify-center py-16">
+                    <p class="text-sm text-gray-500">No users found in the database.</p>
+                </div>
+            }
+        </div>
 
     <!-- ── Modals ─────────────────────────────────────────────────────────────── -->
 
@@ -124,155 +186,45 @@
 
 @section Scripts {
 <script>
-    // ── Data ─────────────────────────────────────────────────────────────────────
-    let users = [
-        { id: 1,  name: "Emily Carter",       email: "emily.carter@school.edu",          role: "Teacher",  status: "active",   emailLink: false },
-        { id: 2,  name: "Michael Nguyen",      email: "michael.nguyen@school.edu",        role: "Teacher",  status: "active",   emailLink: false },
-        { id: 3,  name: "Priya Sharma",        email: "priya.sharma@school.edu",          role: "Teacher",  status: "active",   emailLink: true  },
-        { id: 4,  name: "David Kim",           email: "david.kim@school.edu",             role: "Teacher",  status: "active",   emailLink: false },
-        { id: 5,  name: "Sofia Rossi",         email: "sofia.rossi@school.edu",           role: "Teacher",  status: "inactive", emailLink: false },
-        { id: 6,  name: "Liam Smith",          email: "liam.smith1@school.edu",           role: "Student",  status: "Inactive", emailLink: true  },
-        { id: 7,  name: "Olivia Brown",        email: "olivia.brown2@school.edu",         role: "Student",  status: "active",   emailLink: false },
-        { id: 8,  name: "Noah Miller",         email: "noah.miller3@school.edu",          role: "Student",  status: "active",   emailLink: false },
-        { id: 9,  name: "Emma Martinez",       email: "emma.martinez4@school.edu",        role: "Student",  status: "active",   emailLink: false },
-        { id: 10, name: "Oliver Wilson",       email: "oliver.wilson5@school.edu",        role: "Student",  status: "active",   emailLink: true  },
-        { id: 11, name: "Ava Taylor",          email: "ava.taylor6@school.edu",           role: "Student",  status: "active",   emailLink: true  },
-        { id: 12, name: "Elijah Martin",       email: "elijah.martin7@school.edu",        role: "Student",  status: "active",   emailLink: false },
-        { id: 13, name: "Charlotte Thompson",  email: "charlotte.thompson8@school.edu",   role: "Student",  status: "active",   emailLink: false },
-        { id: 14, name: "William Sanchez",     email: "william.sanchez9@school.edu",      role: "Student",  status: "active",   emailLink: false },
-        { id: 15, name: "Sophia Lewis",        email: "sophia.lewis10@school.edu",        role: "Student",  status: "active",   emailLink: true  },
-        { id: 16, name: "James Smith",         email: "james.smith11@school.edu",         role: "Student",  status: "active",   emailLink: false },
-        { id: 17, name: "Amelia Brown",        email: "amelia.brown12@school.edu",        role: "Student",  status: "inactive", emailLink: false },
-        { id: 18, name: "Benjamin Miller",     email: "benjamin.miller13@school.edu",     role: "Student",  status: "active",   emailLink: true  },
-        { id: 19, name: "Isabella Martinez",   email: "isabella.martinez14@school.edu",   role: "Student",  status: "active",   emailLink: false },
-        { id: 20, name: "Lucas Wilson",        email: "lucas.wilson15@school.edu",        role: "Student",  status: "active",   emailLink: true  },
-        { id: 21, name: "Mia Taylor",          email: "mia.taylor16@school.edu",          role: "Student",  status: "active",   emailLink: false },
-        { id: 22, name: "Henry Martin",        email: "henry.martin17@school.edu",        role: "Student",  status: "active",   emailLink: true  },
-        { id: 23, name: "Evelyn Thompson",     email: "evelyn.thompson18@school.edu",     role: "Student",  status: "active",   emailLink: false },
-        { id: 24, name: "Alexander Sanchez",   email: "alexander.sanchez19@school.edu",   role: "Student",  status: "active",   emailLink: false },
-        { id: 25, name: "Harper Lewis",        email: "harper.lewis20@school.edu",        role: "Student",  status: "active",   emailLink: true  },
-        { id: 26, name: "Ada Admin",           email: "admin@example.com",                role: "Admin",    status: "active",   emailLink: false },
-    ];
-
-    let editingId = null;
-    let deletingId = null;
-
-    // ── Role badge ────────────────────────────────────────────────────────────────
-    function roleBadge(role) {
-        const map = {
-            Teacher: "bg-teal-50 text-teal-600 border border-teal-200",
-            Student: "bg-green-50 text-green-600 border border-green-200",
-            Admin:   "bg-blue-50  text-blue-600  border border-blue-200",
-        };
-        const cls = map[role] || "bg-gray-100 text-gray-500 border border-gray-200";
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold ${cls}">${role}</span>`;
-    }
-
-    // ── Status badge ──────────────────────────────────────────────────────────────
-    function statusBadge(status) {
-        const isActive = status.toLowerCase() === "active";
-        const cls = isActive
-            ? "border border-green-300 text-green-600 bg-green-50"
-            : "border border-gray-300 text-gray-500 bg-gray-50";
-        return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium ${cls}">${status}</span>`;
-    }
-
-    // ── Render ────────────────────────────────────────────────────────────────────
-    function renderTable() {
-        const tbody = document.getElementById("usersTableBody");
-        tbody.innerHTML = "";
-
-        users.forEach((u, idx) => {
-            const isLast = idx === users.length - 1;
-            const row = document.createElement("div");
-            row.className = "group grid gap-4 items-center px-6 py-3.5 hover:bg-gray-50/60 transition-colors" + (isLast ? "" : " border-b border-gray-100");
-            row.style.gridTemplateColumns = "1.6fr 2fr 140px 120px";
-
-            // Name cell
-            const nameCell = document.createElement("div");
-            nameCell.innerHTML = `<span class="text-sm font-semibold text-gray-800">${u.name}</span>`;
-
-            // Email cell
-            const emailCell = document.createElement("div");
-            if (u.emailLink) {
-                emailCell.innerHTML = `<a href="mailto:${u.email}" class="text-sm text-blue-500 hover:text-blue-700 transition-colors">${u.email}</a>`;
-            } else {
-                emailCell.innerHTML = `<span class="text-sm text-gray-500">${u.email}</span>`;
-            }
-
-            // Role cell
-            const roleCell = document.createElement("div");
-            roleCell.innerHTML = roleBadge(u.role);
-
-            // Status cell  (badge + hover actions)
-            const statusCell = document.createElement("div");
-            statusCell.className = "flex items-center gap-2";
-            statusCell.innerHTML = `
-                ${statusBadge(u.status)}
-                <div class="hidden group-hover:flex items-center gap-1 ml-1">
-                    <button onclick="openEdit(${u.id})"
-                            title="Edit"
-                            class="p-1 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                    </button>
-                    <button onclick="openDelete(${u.id})"
-                            title="Delete"
-                            class="p-1 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                    </button>
-                </div>`;
-
-            row.appendChild(nameCell);
-            row.appendChild(emailCell);
-            row.appendChild(roleCell);
-            row.appendChild(statusCell);
-            tbody.appendChild(row);
-        });
-    }
+    let editingRow = null;
+    let deletingRow = null;
 
     // ── Edit ──────────────────────────────────────────────────────────────────────
-    function openEdit(id) {
-        const u = users.find(x => x.id === id);
-        if (!u) return;
-        editingId = id;
-        document.getElementById("editName").value   = u.name;
-        document.getElementById("editEmail").value  = u.email;
-        document.getElementById("editRole").value   = u.role;
-        document.getElementById("editStatus").value = u.status.toLowerCase();
+    function openEdit(row) {
+        editingRow = row;
+        document.getElementById("editName").value   = row.dataset.name;
+        document.getElementById("editEmail").value  = row.dataset.email;
+        document.getElementById("editRole").value   = row.dataset.role;
+        document.getElementById("editStatus").value = row.dataset.status;
         openModal("editModal");
     }
 
     function saveEdit() {
-        const u = users.find(x => x.id === editingId);
-        if (!u) return;
-        u.name   = document.getElementById("editName").value.trim()  || u.name;
-        u.email  = document.getElementById("editEmail").value.trim() || u.email;
-        u.role   = document.getElementById("editRole").value;
-        u.status = document.getElementById("editStatus").value;
+        if (!editingRow) return;
+        // Update visual (real persistence would need a form POST)
+        const name = document.getElementById("editName").value.trim() || editingRow.dataset.name;
+        const role = document.getElementById("editRole").value;
+        editingRow.dataset.name = name;
+        editingRow.dataset.role = role;
+        // Update displayed name
+        const nameEl = editingRow.querySelector("span.text-sm.font-semibold");
+        if (nameEl) nameEl.textContent = name;
         closeModal("editModal");
-        renderTable();
         showToast("User updated successfully!");
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────────
-    function openDelete(id) {
-        const u = users.find(x => x.id === id);
-        if (!u) return;
-        deletingId = id;
-        document.getElementById("deleteUserName").textContent = u.name;
+    function openDelete(row) {
+        deletingRow = row;
+        document.getElementById("deleteUserName").textContent = row.dataset.name;
         openModal("deleteModal");
     }
 
     function confirmDelete() {
-        users = users.filter(x => x.id !== deletingId);
+        if (deletingRow) {
+            deletingRow.remove();
+        }
         closeModal("deleteModal");
-        renderTable();
         showToast("User deleted.");
     }
 
@@ -289,7 +241,6 @@
         el.classList.remove("flex");
     }
 
-    // Close modals on backdrop click
     ["editModal", "deleteModal"].forEach(id => {
         document.getElementById(id).addEventListener("click", function (e) {
             if (e.target === this) closeModal(id);
@@ -307,8 +258,8 @@
             toast.classList.remove("flex");
         }, 3000);
     }
-
-    // ── Init ──────────────────────────────────────────────────────────────────────
-    renderTable();
 </script>
 }
+
+    let editingId = null;
+

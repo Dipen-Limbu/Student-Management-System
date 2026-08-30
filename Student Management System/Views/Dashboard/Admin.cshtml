@@ -1,5 +1,10 @@
+@using System.Security.Claims
 @{
     Layout = null;
+    var fullName = User.FindFirst("FullName")?.Value ?? User.Identity?.Name ?? "Admin";
+    var nameParts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = string.Join("", nameParts.Take(2).Select(p => p[0])).ToUpper();
+    if (string.IsNullOrEmpty(initials) && fullName.Length >= 1) initials = fullName[..Math.Min(2, fullName.Length)].ToUpper();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -118,10 +123,10 @@
             <div class="p-4 mt-auto mb-2">
                 <div class="flex items-center gap-3 px-3 py-2 mb-2 group cursor-pointer rounded-xl hover:bg-glass-100 hover:backdrop-blur-md transition-all duration-300">
                     <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm shadow-glass-inner border border-white group-hover:shadow-glass-sm transition-all duration-300">
-                        AA
+                        @initials
                     </div>
                     <div class="flex flex-col">
-                        <span class="font-semibold text-sm text-slate-800">Ada Admin</span>
+                        <span class="font-semibold text-sm text-slate-800">@fullName</span>
                         <span class="text-xs text-slate-500">Admin</span>
                     </div>
                 </div>
@@ -157,10 +162,10 @@
                     <!-- Profile Badge -->
                     <div class="flex items-center gap-3 bg-glass-200 backdrop-blur-md border border-white/70 shadow-glass-inner rounded-xl pl-2 pr-4 py-1.5 cursor-pointer hover:bg-glass-300 hover:shadow-glass-sm transition-all duration-300 active:scale-95">
                         <div class="w-[30px] h-[30px] rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs border border-white shadow-sm">
-                            AA
+                            @initials
                         </div>
                         <div class="flex flex-col">
-                            <span class="font-semibold text-sm text-slate-800 leading-tight">Ada Admin</span>
+                            <span class="font-semibold text-sm text-slate-800 leading-tight">@fullName</span>
                             <span class="text-[11px] text-slate-500 leading-tight">Admin</span>
                         </div>
                     </div>
@@ -171,8 +176,8 @@
                 
                 <!-- Title Area -->
                 <div>
-                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Overview</h1>
-                    <p class="text-sm text-slate-500 mt-1">Welcome back — here's what's happening on campus today.</p>
+                    <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Welcome back, @fullName!</h1>
+                    <p class="text-sm text-slate-500 mt-1">Here's what's happening on campus today.</p>
                 </div>
 
                 <!-- Stats Grid -->
@@ -311,13 +316,7 @@
                             <!-- Item -->
                             <div class="relative pl-6 group/item cursor-default">
                                 <div class="absolute left-[-2px] top-1.5 w-[9px] h-[9px] rounded-full bg-blue-500 shadow-[0_0_0_4px_rgba(255,255,255,0.7)] group-hover/item:scale-125 transition-transform duration-300"></div>
-                                <p class="text-[13px] text-slate-600 leading-snug"><span class="font-semibold text-slate-900">Emily Carter</span> added a new student <span class="font-semibold text-slate-900">Liam Smith</span></p>
-                                <p class="text-[11px] text-slate-400 mt-1 font-medium">2m ago</p>
-                            </div>
-                            <!-- Item -->
-                            <div class="relative pl-6 group/item cursor-default">
-                                <div class="absolute left-[-2px] top-1.5 w-[9px] h-[9px] rounded-full bg-blue-500 shadow-[0_0_0_4px_rgba(255,255,255,0.7)] group-hover/item:scale-125 transition-transform duration-300"></div>
-                                <p class="text-[13px] text-slate-600 leading-snug"><span class="font-semibold text-slate-900">Ada Admin</span> created a new class <span class="font-semibold text-slate-900">DS301 - A</span></p>
+                                <p class="text-[13px] text-slate-600 leading-snug"><span class="font-semibold text-slate-900">@fullName</span> created a new class <span class="font-semibold text-slate-900">DS301 - A</span></p>
                                 <p class="text-[11px] text-slate-400 mt-1 font-medium">1h ago</p>
                             </div>
                             <!-- Item -->
@@ -362,24 +361,6 @@
                             
                             <div class="space-y-2">
                                 <!-- Row 1 -->
-                                <div class="grid grid-cols-12 items-center py-2.5 px-3 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 shadow-glass-inner hover:bg-white/70 hover:shadow-glass-sm hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
-                                    <div class="col-span-5 flex items-center gap-3.5">
-                                        <div class="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs border border-white shadow-sm group-hover:scale-105 transition-transform">
-                                            LS
-                                        </div>
-                                        <div class="flex flex-col">
-                                            <span class="font-semibold text-slate-800 text-[13.5px]">Liam Smith</span>
-                                            <span class="text-[11px] text-slate-500 font-medium mt-0.5">liam.smith1@@school.edu</span>
-                                        </div>
-                                    </div>
-                                    <div class="col-span-3 text-[13px] text-slate-600 font-medium text-right pr-4">2024-1000</div>
-                                    <div class="col-span-2 text-[13px] text-slate-600 font-medium">CS101</div>
-                                    <div class="col-span-2 text-right">
-                                        <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100/80 text-slate-500 border border-slate-200 shadow-glass-sm tracking-wide">Inactive</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Row 2 -->
                                 <div class="grid grid-cols-12 items-center py-2.5 px-3 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 shadow-glass-inner hover:bg-white/70 hover:shadow-glass-sm hover:scale-[1.01] transition-all duration-300 group cursor-pointer">
                                     <div class="col-span-5 flex items-center gap-3.5">
                                         <div class="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xs border border-white shadow-sm group-hover:scale-105 transition-transform">
