@@ -133,6 +133,74 @@ namespace Student_Management_System.Controllers
             return _context.Students.FirstOrDefault(s => s.Email == username);
         }
 
+        // GET: /Student/GetNotifications — student-specific notification feed
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var student = GetCurrentStudent();
+            var notifications = new List<object>();
+
+            if (student != null)
+            {
+                // Recent enrollments for this student
+                var enrollments = await _context.Enrollments
+                    .Where(e => e.StudentId == student.StudentId)
+                    .Include(e => e.Course)
+                    .OrderByDescending(e => e.EnrolledOn)
+                    .Take(5)
+                    .ToListAsync();
+
+                foreach (var e in enrollments)
+                {
+                    notifications.Add(new
+                    {
+                        type    = "enrollment",
+                        message = $"You were enrolled in <span class=\"font-semibold text-gray-900\">{e.Course?.CourseName ?? "a course"}</span>.",
+                        time    = e.EnrolledOn,
+                        timeAgo = GetTimeAgo(e.EnrolledOn)
+                    });
+                }
+
+                // Recent attendance records for this student
+                var attendances = await _context.Attendances
+                    .Where(a => a.StudentId == student.StudentId)
+                    .OrderByDescending(a => a.Date)
+                    .Take(5)
+                    .ToListAsync();
+
+                foreach (var a in attendances)
+                {
+                    var statusColor = a.Status == "Present" ? "text-green-600" : a.Status == "Absent" ? "text-red-600" : "text-yellow-600";
+                    notifications.Add(new
+                    {
+                        type    = "attendance",
+                        message = $"Your attendance was marked as <span class=\"font-semibold {statusColor}\">{a.Status}</span> on {a.Date:MMM d, yyyy}.",
+                        time    = (DateTime?)a.Date.ToDateTime(TimeOnly.MinValue),
+                        timeAgo = GetTimeAgo(a.Date.ToDateTime(TimeOnly.MinValue))
+                    });
+                }
+            }
+
+            var sorted = notifications
+                .OrderByDescending(n => ((dynamic)n).time ?? DateTime.MinValue)
+                .Take(10)
+                .ToList();
+
+            return Json(new { count = sorted.Count, items = sorted });
+        }
+
+        private static string GetTimeAgo(DateTime? dt)
+        {
+            if (dt == null) return "Recently";
+            var diff = DateTime.UtcNow - dt.Value.ToUniversalTime();
+            if (diff.TotalMinutes < 1)  return "Just now";
+            if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
+            if (diff.TotalHours   < 24) return $"{(int)diff.TotalHours} hr ago";
+            if (diff.TotalDays    < 7)  return $"{(int)diff.TotalDays} day{((int)diff.TotalDays > 1 ? "s" : "")} ago";
+            return dt.Value.ToString("MMM d, yyyy");
+        }
+
+
         public IActionResult MyCourse()
         {
             var student = GetCurrentStudent();

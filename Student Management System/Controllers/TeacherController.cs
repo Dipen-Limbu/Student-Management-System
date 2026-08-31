@@ -74,6 +74,68 @@ namespace Student_Management_System.Controllers
             return user != null ? _context.Teachers.FirstOrDefault(t => t.UserId == user.UserId) : null;
         }
 
+        // GET: /Teacher/GetNotifications — teacher-specific notification feed
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var notifications = new List<object>();
+
+            // Recent students enrolled (last 5)
+            var recentStudents = await _context.Students
+                .Where(s => s.EnrolledOn != null)
+                .OrderByDescending(s => s.EnrolledOn)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var s in recentStudents)
+            {
+                notifications.Add(new
+                {
+                    type    = "student",
+                    message = $"New student <span class=\"font-semibold text-gray-900\">{s.FullName}</span> registered.",
+                    time    = s.EnrolledOn,
+                    timeAgo = GetTimeAgo(s.EnrolledOn)
+                });
+            }
+
+            // Recent course enrollments
+            var recentEnrollments = await _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .OrderByDescending(e => e.EnrolledOn)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var e in recentEnrollments)
+            {
+                notifications.Add(new
+                {
+                    type    = "enrollment",
+                    message = $"<span class=\"font-semibold text-gray-900\">{e.Student?.FullName ?? "A student"}</span> enrolled in {e.Course?.CourseName ?? "a course"}.",
+                    time    = e.EnrolledOn,
+                    timeAgo = GetTimeAgo(e.EnrolledOn)
+                });
+            }
+
+            var sorted = notifications
+                .OrderByDescending(n => ((dynamic)n).time ?? DateTime.MinValue)
+                .Take(10)
+                .ToList();
+
+            return Json(new { count = sorted.Count, items = sorted });
+        }
+
+        private static string GetTimeAgo(DateTime? dt)
+        {
+            if (dt == null) return "Recently";
+            var diff = DateTime.UtcNow - dt.Value.ToUniversalTime();
+            if (diff.TotalMinutes < 1)  return "Just now";
+            if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
+            if (diff.TotalHours   < 24) return $"{(int)diff.TotalHours} hr ago";
+            if (diff.TotalDays    < 7)  return $"{(int)diff.TotalDays} day{((int)diff.TotalDays > 1 ? "s" : "")} ago";
+            return dt.Value.ToString("MMM d, yyyy");
+        }
+
         // --- Teacher Role Dashboard Actions ---
         public IActionResult Dashboard()
         {
