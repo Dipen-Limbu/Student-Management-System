@@ -194,6 +194,86 @@ namespace Student_Management_System.Controllers
         }
         public IActionResult Settings() { return View(); }
 
+        // GET: /Admin/GetNotifications — returns real activity as JSON for the notification bell
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var notifications = new List<object>();
+
+            // Recent students enrolled (last 7 days)
+            var recentStudents = await _context.Students
+                .Where(s => s.EnrolledOn != null)
+                .OrderByDescending(s => s.EnrolledOn)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var s in recentStudents)
+            {
+                notifications.Add(new
+                {
+                    type    = "student",
+                    message = $"<span class=\"font-semibold text-gray-900\">{s.FullName}</span> registered as a new student.",
+                    time    = s.EnrolledOn,
+                    timeAgo = GetTimeAgo(s.EnrolledOn)
+                });
+            }
+
+            // Recent enrollments
+            var recentEnrollments = await _context.Enrollments
+                .Include(e => e.Student)
+                .Include(e => e.Course)
+                .OrderByDescending(e => e.EnrolledOn)
+                .Take(5)
+                .ToListAsync();
+
+            foreach (var e in recentEnrollments)
+            {
+                notifications.Add(new
+                {
+                    type    = "enrollment",
+                    message = $"<span class=\"font-semibold text-gray-900\">{e.Student?.FullName ?? "A student"}</span> enrolled in <span class=\"font-semibold text-gray-900\">{e.Course?.CourseName ?? "a course"}</span>.",
+                    time    = e.EnrolledOn,
+                    timeAgo = GetTimeAgo(e.EnrolledOn)
+                });
+            }
+
+            // Recent teachers added (use TeacherId as a proxy for recency)
+            var recentTeachers = await _context.Teachers
+                .OrderByDescending(t => t.TeacherId)
+                .Take(3)
+                .ToListAsync();
+
+            foreach (var t in recentTeachers)
+            {
+                notifications.Add(new
+                {
+                    type    = "teacher",
+                    message = $"<span class=\"font-semibold text-gray-900\">{t.Name ?? "A teacher"}</span> was added to the system.",
+                    time    = (DateTime?)null,
+                    timeAgo = "Recently"
+                });
+            }
+
+            // Sort by time descending, keep top 10
+            var sorted = notifications
+                .OrderByDescending(n => ((dynamic)n).time ?? DateTime.MinValue)
+                .Take(10)
+                .ToList();
+
+            return Json(new { count = sorted.Count, items = sorted });
+        }
+
+        private static string GetTimeAgo(DateTime? dt)
+        {
+            if (dt == null) return "Recently";
+            var diff = DateTime.UtcNow - dt.Value.ToUniversalTime();
+            if (diff.TotalMinutes < 1)   return "Just now";
+            if (diff.TotalMinutes < 60)  return $"{(int)diff.TotalMinutes} min ago";
+            if (diff.TotalHours   < 24)  return $"{(int)diff.TotalHours} hr ago";
+            if (diff.TotalDays    < 7)   return $"{(int)diff.TotalDays} day{((int)diff.TotalDays > 1 ? "s" : "")} ago";
+            return dt.Value.ToString("MMM d, yyyy");
+        }
+
         // GET: /Admin/ChangePassword
         [HttpGet]
         public IActionResult ChangePassword()

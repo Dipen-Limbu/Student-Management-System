@@ -75,58 +75,24 @@
         <!-- Right Actions -->
         <div class="flex items-center gap-5">
             <!-- Notification Bell -->
-            <div class="relative">
-                <button onclick="document.getElementById('admin-notification-dropdown').classList.toggle('hidden')" class="relative p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
-                    <span class="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+            <div class="relative" id="notification-wrapper">
+                <button id="notif-btn" onclick="toggleNotifications()" class="relative p-2 text-gray-600 hover:text-gray-800 transition-colors rounded-full hover:bg-gray-100 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2">
+                    <span id="notif-badge" class="hidden absolute top-0 right-0 flex items-center justify-center h-4 w-4 rounded-full bg-red-500 ring-2 ring-white text-white text-[9px] font-bold leading-none"></span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
                 </button>
 
-                <!-- Dropdown Menu -->
-                <div id="admin-notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-50 transform origin-top-right transition-all">
+                <!-- Dropdown Panel -->
+                <div id="admin-notification-dropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-50">
                     <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <h3 class="text-sm font-bold text-gray-900">Notifications</h3>
-                        <span class="bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full">3 New</span>
+                        <span id="notif-header-count" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full">Loading…</span>
                     </div>
-                    <div class="max-h-[320px] overflow-y-auto">
-                        <!-- Notification Item -->
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-800"><span class="font-semibold text-gray-900">New student</span> registered for Advanced Mathematics.</p>
-                                    <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Notification Item -->
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-800">System backup completed <span class="font-semibold text-gray-900">successfully</span>.</p>
-                                    <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
-                                </div>
-                            </div>
-                        </a>
-                        <!-- Notification Item -->
-                        <a href="#" class="block px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
-                            <div class="flex gap-3">
-                                <div class="w-8 h-8 rounded-full bg-yellow-50 text-yellow-600 flex items-center justify-center shrink-0 mt-0.5">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-800"><span class="font-semibold text-gray-900">Database storage</span> is running low.</p>
-                                    <p class="text-xs text-gray-400 mt-1">3 hours ago</p>
-                                </div>
-                            </div>
-                        </a>
+                    <div id="notif-list" class="max-h-[320px] overflow-y-auto divide-y divide-gray-50">
+                        <!-- Skeleton loader -->
+                        <div class="px-4 py-3 text-xs text-gray-400 text-center animate-pulse">Loading notifications…</div>
                     </div>
                     <div class="px-4 py-2.5 border-t border-gray-100 bg-gray-50/50 text-center">
-                        <a href="#" class="text-xs font-semibold text-blue-600 hover:text-blue-700">View all notifications</a>
+                        <button onclick="loadNotifications()" class="text-xs font-semibold text-blue-600 hover:text-blue-700">Refresh</button>
                     </div>
                 </div>
             </div>
@@ -232,5 +198,113 @@
     </div>
 
     @RenderSection("Scripts", required: false)
+
+    <script>
+        // ── Notification Bell Logic ───────────────────────────────────────────
+
+        const ICONS = {
+            student: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`,
+            enrollment: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>`,
+            teacher: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`,
+            default: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>`
+        };
+
+        const COLORS = {
+            student:    { bg: 'bg-blue-50',   text: 'text-blue-600'   },
+            enrollment: { bg: 'bg-green-50',  text: 'text-green-600'  },
+            teacher:    { bg: 'bg-purple-50', text: 'text-purple-600' },
+            default:    { bg: 'bg-gray-50',   text: 'text-gray-600'   }
+        };
+
+        let notificationsLoaded = false;
+
+        async function loadNotifications() {
+            const list  = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+            const hdr   = document.getElementById('notif-header-count');
+
+            list.innerHTML = '<div class="px-4 py-3 text-xs text-gray-400 text-center animate-pulse">Loading…</div>';
+
+            try {
+                const res  = await fetch('/Admin/GetNotifications');
+                const data = await res.json();
+
+                const count = data.count ?? 0;
+
+                // Badge
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+
+                hdr.textContent = count > 0 ? `${count} New` : 'No new';
+
+                if (!data.items || data.items.length === 0) {
+                    list.innerHTML = '<div class="px-4 py-6 text-xs text-gray-400 text-center">No notifications yet.</div>';
+                    return;
+                }
+
+                list.innerHTML = data.items.map(n => {
+                    const type   = n.type || 'default';
+                    const colors = COLORS[type] || COLORS.default;
+                    const icon   = ICONS[type]  || ICONS.default;
+                    return `
+                        <div class="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors cursor-default">
+                            <div class="w-8 h-8 rounded-full ${colors.bg} ${colors.text} flex items-center justify-center shrink-0 mt-0.5">
+                                ${icon}
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-sm text-gray-800 leading-snug">${n.message}</p>
+                                <p class="text-xs text-gray-400 mt-1">${n.timeAgo}</p>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                notificationsLoaded = true;
+            } catch (err) {
+                list.innerHTML = '<div class="px-4 py-6 text-xs text-red-400 text-center">Failed to load notifications.</div>';
+                console.error('Notification fetch error:', err);
+            }
+        }
+
+        function toggleNotifications() {
+            const dropdown = document.getElementById('admin-notification-dropdown');
+            const isHidden = dropdown.classList.toggle('hidden');
+            if (!isHidden && !notificationsLoaded) {
+                loadNotifications();
+            }
+        }
+
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrapper  = document.getElementById('notification-wrapper');
+            const dropdown = document.getElementById('admin-notification-dropdown');
+            if (wrapper && !wrapper.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // Load badge count silently on page load (without opening the panel)
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                const res  = await fetch('/Admin/GetNotifications');
+                const data = await res.json();
+                const badge = document.getElementById('notif-badge');
+                const hdr   = document.getElementById('notif-header-count');
+                const count = data.count ?? 0;
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('hidden');
+                    hdr.textContent = `${count} New`;
+                } else {
+                    badge.classList.add('hidden');
+                    hdr.textContent = 'No new';
+                }
+                notificationsLoaded = false; // force re-render when opened
+            } catch (_) {}
+        });
+    </script>
 </body>
 </html>
